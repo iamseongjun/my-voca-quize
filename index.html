@@ -19,16 +19,18 @@
 
 <div class="app-container">
     <div id="start-screen">
-        <h1>📚 영단어 마스터</h1>
+        <h1> 영단어 TEST </h1>
         <input type="text" id="user-name" class="input-box" placeholder="이름 입력">
-        <select id="category-select" class="input-box">
-            <option value="25년 고1 10월 모의고사">📖 25년 고1 10월 모의고사</option>
-            <option value="전체">모든 단어 섞어서 (종합)</option>
-        </select>
+  <select id="category-select" class="input-box">
+    <option value="25년 고1 10월 모의고사">📖 25년 고1 10월 모의고사</option>
+    <option value="26년 고2 6월 모의고사">📖 26년 고1 6월 모의고사</option>
+    <option value="26년 고2 6월 모의고사">📖 26년 고2 6월 모의고사</option>
+    <option value="전체">모든 단어 섞어서 (종합)</option>
+</select>
         <select id="mode-select" class="input-box">
-            <option value="practice">🟢 객관식 연습</option>
-            <option value="test">🔥 주관식 테스트</option>
-            <option value="mixed">🎲 혼합 모드</option>
+            <option value="practice"> 객관식 </option>
+            <option value="test"> 주관식 </option>
+            <option value="mixed"> 객관식/주관식혼합 </option>
         </select>
         <button class="start-btn" onclick="startQuiz()">시험 시작하기</button>
         <button onclick="openAdmin()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">⚙️ 관리자 모드</button>
