@@ -19,6 +19,7 @@ mongoose.connect(mongoURI)
 // ⭐️ 데이터베이스에 들어갈 데이터의 모양(Schema)을 정의합니다.
 const recordSchema = new mongoose.Schema({
   name: String,
+  category: String, // ⭐️ [이 줄이 새롭게 추가됨!]
   date: String,
   score: Number,
   total: Number,

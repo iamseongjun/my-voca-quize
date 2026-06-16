@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>단어 퀴즈 앱 (서버 연동 버전)</title>
+    <title>단어 퀴즈 앱 (카테고리 버전)</title>
     <style>
         body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background-color: #eef2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .app-container { background: white; width: 100%; max-width: 400px; height: 90vh; max-height: 750px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; padding: 30px 20px; box-sizing: border-box; text-align: center; overflow-y: auto; }
         h1 { color: #333; font-size: 22px; margin-top: 0; margin-bottom: 20px; }
         
         #start-screen { display: flex; flex-direction: column; justify-content: center; height: 100%; }
-        .name-input { padding: 15px; font-size: 18px; border: 2px solid #e0e0e0; border-radius: 10px; margin-bottom: 20px; text-align: center; outline: none; }
-        .start-btn { background-color: #007bff; color: white; border: none; padding: 16px; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+        .input-box { padding: 15px; font-size: 16px; border: 2px solid #e0e0e0; border-radius: 10px; margin-bottom: 15px; text-align: center; outline: none; width: 100%; box-sizing: border-box; }
+        .start-btn { background-color: #007bff; color: white; border: none; padding: 16px; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 10px; }
         .admin-link { margin-top: 30px; font-size: 14px; color: #aaa; text-decoration: underline; cursor: pointer; background: none; border: none; }
         
         .question-box { background-color: #f8f9fa; border-radius: 15px; padding: 30px 20px; margin-bottom: 20px; }
@@ -30,6 +30,7 @@
         #admin-screen { display: none; text-align: left; }
         .record-card { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; }
         .record-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .category-badge { display: inline-block; background: #007bff; color: white; padding: 3px 8px; border-radius: 5px; font-size: 11px; margin-bottom: 5px; }
         .close-admin-btn { background-color: #6c757d; margin-top: 20px; }
     </style>
 </head>
@@ -37,14 +38,22 @@
 
 <div class="app-container">
     <div id="start-screen">
-        <h1>📚 단어 퀴즈 (서버 연동)</h1>
-        <input type="text" id="user-name" class="name-input" placeholder="이름 입력" autocomplete="off">
+        <h1>📚 오늘의 단어 퀴즈</h1>
+        <input type="text" id="user-name" class="input-box" placeholder="이름 입력" autocomplete="off">
+        
+        <select id="category-select" class="input-box">
+            <option value="전체">전체 단어 (종합)</option>
+            <option value="과일">🍎 과일 영단어</option>
+            <option value="IT">💻 IT 필수 용어</option>
+            <option value="동물">🐶 동물 영단어</option>
+        </select>
+
         <button class="start-btn" onclick="startQuiz()">시험 시작하기</button>
         <button class="admin-link" onclick="openAdmin()">⚙️ 관리자 모드 접속</button>
     </div>
 
     <div id="quiz-screen" style="display: none; flex-direction: column; height: 100%;">
-        <h1>📝 시험 진행 중</h1>
+        <h1 id="quiz-title">📝 시험 진행 중</h1>
         <div class="question-box">
             <div class="question-type" id="question-type">질문 유형</div>
             <div class="question-text" id="question-text">Word</div>
@@ -55,7 +64,7 @@
 
     <div id="result-screen" style="display: none;">
         <h2 style="color: #28a745; margin-top: 10px;">테스트 완료! 🎉</h2>
-        <p>수고하셨습니다, <strong id="display-name"></strong>님!</p>
+        <p><span id="result-category" style="color:#007bff; font-weight:bold;"></span> 수고하셨습니다, <strong id="display-name"></strong>님!</p>
         <p>총 <span id="total-count">0</span>문제 중 <strong style="font-size: 20px;" id="correct-count">0</strong>문제를 맞췄습니다.</p>
         <div id="wrong-list-container" style="display: none;">
             <h3 style="font-size: 16px; color: #dc3545; margin-top: 20px; text-align: left;">📖 오답 노트</h3>
@@ -74,16 +83,31 @@
 
 <script>
     const ADMIN_PASSWORD = "1234";
-    const wordList = [
-        { en: 'apple', ko: '사과' },
-        { en: 'beautiful', ko: '아름다운' },
-        { en: 'computer', ko: '컴퓨터' },
-        { en: 'develop', ko: '개발하다' },
-        { en: 'environment', 코: '환경' } // <-- 'ko' 오타 주의 (위 기존 코드 유지) - 정상 작동을 위해 아래처럼 수정했습니다.
-        // 수정됨:
-    ];
-    wordList[4] = { en: 'environment', ko: '환경' };
+    
+    // ⭐️ [변경] 단어에 'category' 속성이 추가된 새로운 데이터베이스 구조!
+    // 원하는 만큼 단어를 계속 추가하시면 됩니다.
+    const fullWordDatabase = [
+        { category: '과일', en: 'apple', ko: '사과' },
+        { category: '과일', en: 'banana', ko: '바나나' },
+        { category: '과일', en: 'grape', ko: '포도' },
+        { category: '과일', en: 'peach', ko: '복숭아' },
+        { category: '과일', en: 'melon', ko: '멜론' },
+        
+        { category: 'IT', en: 'computer', ko: '컴퓨터' },
+        { category: 'IT', en: 'develop', ko: '개발하다' },
+        { category: 'IT', en: 'network', ko: '네트워크' },
+        { category: 'IT', en: 'database', ko: '데이터베이스' },
+        { category: 'IT', en: 'server', ko: '서버' },
 
+        { category: '동물', en: 'dog', ko: '개' },
+        { category: '동물', en: 'cat', ko: '고양이' },
+        { category: '동물', en: 'elephant', ko: '코끼리' },
+        { category: '동물', en: 'lion', ko: '사자' },
+        { category: '동물', en: 'tiger', ko: '호랑이' }
+    ];
+
+    let currentQuizList = []; // 현재 풀고 있는 카테고리의 단어들만 모아둘 배열
+    let currentCategoryName = "";
     let currentQuestionIndex = 0, score = 0, currentUser = "", currentCorrectAnswer = "", incorrectWords = [];
 
     const startScreen = document.getElementById('start-screen'), quizScreen = document.getElementById('quiz-screen'), resultScreen = document.getElementById('result-screen'), adminScreen = document.getElementById('admin-screen'), nameInput = document.getElementById('user-name');
@@ -94,17 +118,41 @@
         startScreen.style.display = 'flex'; quizScreen.style.display = 'none'; resultScreen.style.display = 'none'; adminScreen.style.display = 'none'; nameInput.value = "";
     }
 
+    // ⭐️ [변경] 퀴즈 시작 시 카테고리 필터링 로직 추가
     function startQuiz() {
         const name = nameInput.value.trim();
         if (name === "") { alert("이름을 꼭 입력해주세요!"); return; }
+        
+        // 선택한 카테고리 가져오기
+        const selectedCategory = document.getElementById('category-select').value;
+        currentCategoryName = selectedCategory;
+
+        // 선택한 카테고리에 맞춰 단어 리스트 걸러내기
+        if (selectedCategory === "전체") {
+            currentQuizList = [...fullWordDatabase]; // 전체 복사
+        } else {
+            currentQuizList = fullWordDatabase.filter(word => word.category === selectedCategory);
+        }
+
+        // 객관식 퀴즈이므로 4개 미만이면 진행 불가 처리
+        if (currentQuizList.length < 4) {
+            alert("이 카테고리에는 단어가 4개 미만이라 객관식 퀴즈를 만들 수 없습니다. 단어를 더 추가해주세요!");
+            return;
+        }
+
+        // 시험 순서 무작위 섞기 (원치 않으시면 이 줄을 삭제하세요)
+        shuffleArray(currentQuizList);
+
         currentUser = name; currentQuestionIndex = 0; score = 0; incorrectWords = [];
+        
+        document.getElementById('quiz-title').innerText = `📝 [${selectedCategory}] 진행 중`;
         startScreen.style.display = 'none'; quizScreen.style.display = 'flex';
         loadQuestion();
     }
 
     function loadQuestion() {
-        if (currentQuestionIndex >= wordList.length) { endQuiz(); return; }
-        const currentWord = wordList[currentQuestionIndex];
+        if (currentQuestionIndex >= currentQuizList.length) { endQuiz(); return; }
+        const currentWord = currentQuizList[currentQuestionIndex];
         const isEnToKo = Math.random() > 0.5;
         let questionText, correctOption;
 
@@ -114,7 +162,7 @@
         document.getElementById('question-text').innerText = questionText;
         currentCorrectAnswer = correctOption;
 
-        let wrongWords = wordList.filter(word => word !== currentWord);
+        let wrongWords = currentQuizList.filter(word => word !== currentWord);
         wrongWords = shuffleArray(wrongWords).slice(0, 3);
         let wrongOptions = wrongWords.map(word => isEnToKo ? word.ko : word.en);
         let allOptions = shuffleArray([correctOption, ...wrongOptions]);
@@ -125,7 +173,7 @@
             const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = optionText;
             btn.onclick = () => checkAnswer(optionText, currentWord); optionsContainer.appendChild(btn);
         });
-        document.getElementById('status-bar').innerText = `진행 상황: ${currentQuestionIndex + 1} / ${wordList.length}`;
+        document.getElementById('status-bar').innerText = `진행 상황: ${currentQuestionIndex + 1} / ${currentQuizList.length}`;
     }
 
     function checkAnswer(selectedOption, currentWordData) {
@@ -137,7 +185,8 @@
     function endQuiz() {
         quizScreen.style.display = 'none'; resultScreen.style.display = 'block';
         document.getElementById('display-name').innerText = currentUser;
-        document.getElementById('total-count').innerText = wordList.length;
+        document.getElementById('result-category').innerText = `[${currentCategoryName} 테스트]`;
+        document.getElementById('total-count').innerText = currentQuizList.length;
         document.getElementById('correct-count').innerText = score;
 
         const wrongContainer = document.getElementById('wrong-list-container'), wrongListEl = document.getElementById('wrong-list');
@@ -149,32 +198,37 @@
             });
         } else { wrongContainer.style.display = "none"; }
 
-        saveRecordToServer(); // <--- 기존 로컬 스토리지가 아닌 서버로 전송!
+        saveRecordToServer();
     }
 
-    // ⭐ [핵심 추가] 서버로 데이터 보내기 (POST)
+    // ⭐️ [변경] 서버로 보낼 때 'category' 정보도 함께 보냄
     async function saveRecordToServer() {
-        const record = { name: currentUser, date: new Date().toLocaleString(), score: score, total: wordList.length, wrong: incorrectWords };
+        const record = { 
+            name: currentUser, 
+            category: currentCategoryName, // <--- 추가!
+            date: new Date().toLocaleString(), 
+            score: score, 
+            total: currentQuizList.length, 
+            wrong: incorrectWords 
+        };
         try {
             await fetch('/api/records', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(record)
             });
-        } catch (error) {
-            console.error("서버 전송 실패:", error);
-        }
+        } catch (error) { console.error("서버 전송 실패:", error); }
     }
 
     function openAdmin() {
         const password = prompt("관리자 비밀번호를 입력하세요:");
         if (password === ADMIN_PASSWORD) {
             startScreen.style.display = 'none'; adminScreen.style.display = 'block';
-            loadRecordsFromServer(); // <--- 서버에서 기록 가져오기!
+            loadRecordsFromServer();
         } else if (password !== null) { alert("비밀번호가 틀렸습니다."); }
     }
 
-    // ⭐ [핵심 추가] 서버에서 데이터 받아오기 (GET)
+    // ⭐️ [변경] 관리자 화면에 과목(카테고리) 뱃지 표시
     async function loadRecordsFromServer() {
         const recordsContainer = document.getElementById('records-container');
         recordsContainer.innerHTML = "<p>서버에서 기록을 불러오는 중...</p>";
@@ -190,15 +244,24 @@
             }
 
             savedRecords.slice().reverse().forEach(record => {
+                // 카테고리 텍스트 (예전 기록은 카테고리가 없을 수 있으므로 방어 코드 작성)
+                const catText = record.category ? record.category : "기본";
+                
                 let wrongHTML = record.wrong.length > 0 ? `<div style="margin-top:5px; color:#dc3545; font-size:12px;">오답: ${record.wrong.map(w => w.word.split(' ')[0]).join(', ')}</div>` : `<div style="margin-top:5px; color:#28a745; font-size:12px;">백점! 🎉</div>`;
-                recordsContainer.innerHTML += `<div class="record-card"><div class="record-header"><span>👤 ${record.name}</span><span>${record.score} / ${record.total} 점</span></div><div style="font-size: 11px; color: #888;">${record.date}</div>${wrongHTML}</div>`;
+                recordsContainer.innerHTML += `
+                <div class="record-card">
+                    <span class="category-badge">${catText}</span>
+                    <div class="record-header">
+                        <span>👤 ${record.name}</span>
+                        <span>${record.score} / ${record.total} 점</span>
+                    </div>
+                    <div style="font-size: 11px; color: #888;">${record.date}</div>
+                    ${wrongHTML}
+                </div>`;
             });
-        } catch (error) {
-            recordsContainer.innerHTML = "<p>기록을 불러오지 못했습니다.</p>";
-        }
+        } catch (error) { recordsContainer.innerHTML = "<p>기록을 불러오지 못했습니다.</p>"; }
     }
 
-    // ⭐ [핵심 추가] 서버에 삭제 요청하기 (DELETE)
     async function clearRecords() {
         if(confirm("모든 학생의 기록을 정말 삭제하시겠습니까? (복구 불가)")) {
             await fetch('/api/records', { method: 'DELETE' });
