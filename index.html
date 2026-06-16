@@ -3,73 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>영단어 마스터</title>
+    <title>단어 퀴즈 앱 (관리자 기능 포함)</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #333; }
-        .app-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); width: 100%; max-width: 420px; height: 90vh; max-height: 800px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); display: flex; flex-direction: column; padding: 40px 25px; box-sizing: border-box; text-align: center; overflow-y: auto; }
-        h1 { color: #2c3e50; font-size: 26px; font-weight: 800; margin-bottom: 25px; }
-        .input-box { padding: 16px; font-size: 16px; border: 2px solid #e1e8ed; border-radius: 14px; margin-bottom: 15px; text-align: center; outline: none; width: 100%; box-sizing: border-box; background-color: #f8faff; }
-        .start-btn { background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%); color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 14px; cursor: pointer; margin-top: 10px; }
-        .question-box { background-color: #f0f4f8; border-radius: 20px; padding: 35px 20px; margin-bottom: 20px; }
-        .option-btn { background: white; border: 2px solid #e1e8ed; padding: 18px; margin: 6px 0; border-radius: 14px; cursor: pointer; width: 100%; font-weight: bold; }
-        .wrong-list { text-align: left; background: #fff5f5; padding: 15px; border-radius: 16px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
+        /* 기본 배경: 부드러운 그라데이션 */
+        body { 
+            font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; color: #333;
+        }
+        
+        /* 메인 앱 컨테이너: 둥글고 부드러운 그림자 (모던 앱 스타일) */
+        .app-container { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px);
+            width: 100%; max-width: 420px; height: 90vh; max-height: 800px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+            display: flex; flex-direction: column; 
+            padding: 40px 25px; box-sizing: border-box; 
+            text-align: center; overflow-y: auto; 
+        }
+        h1 { color: #2c3e50; font-size: 26px; font-weight: 800; margin-top: 0; margin-bottom: 25px; }
+        
+        /* 입력창 디자인 */
+        #start-screen { display: flex; flex-direction: column; justify-content: center; height: 100%; }
+        .input-label { font-size: 14px; color: #5a6c7d; font-weight: 700; text-align: left; margin-bottom: 8px; margin-left: 8px; }
+        .input-box { 
+            padding: 16px; font-size: 16px; border: 2px solid #e1e8ed; 
+            border-radius: 14px; margin-bottom: 20px; text-align: center; 
+            outline: none; width: 100%; box-sizing: border-box; 
+            background-color: #f8faff; transition: all 0.3s ease; 
+            color: #2c3e50; font-weight: 500;
+        }
+        .input-box:focus { border-color: #5b86e5; box-shadow: 0 0 0 4px rgba(91,134,229,0.1); background-color: #fff; }
+        
+        /* 메인 버튼: 트렌디한 그라데이션 및 호버 애니메이션 */
+        .start-btn { 
+            background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%); 
+            color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; 
+            border-radius: 14px; cursor: pointer; margin-top: 10px; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            box-shadow: 0 4px 15px rgba(91,134,229,0.3); 
+        }
+        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,134,229,0.4); }
+        .start-btn:active { transform: translateY(1px); }
+        .admin-link { margin-top: 30px; font-size: 14px; color: #95a5a6; text-decoration: none; cursor: pointer; background: none; border: none; font-weight: 600; transition: color 0.2s; }
+        .admin-link:hover { color: #34495e; }
+        
+        /* 퀴즈 화면 디자인 */
+        .question-box { background-color: #f0f4f8; border-radius: 20px; padding: 35px 20px; margin-bottom: 25px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .question-type { font-size: 15px; color: #7f8c8d; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 34px; font-weight: 800; color: #2c3e50; word-break: keep-all; }
+        
+        /* 객관식 버튼 */
+        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .option-btn { 
+            background-color: white; color: #34495e; border: 2px solid #e1e8ed; 
+            padding: 18px; font-size: 17px; font-weight: bold; 
+            border-radius: 14px; cursor: pointer; transition: all 0.2s; 
+        }
+        .option-btn:hover { background-color: #f8faff; border-color: #5b86e5; color: #5b86e5; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        /* 주관식 입력 */
+        .typing-container { display: none; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        
+        /* 결과 화면 및 오답 노트 */
+        .wrong-list { text-align: left; background: #fff5f5; padding: 20px; border-radius: 16px; margin-top: 15px; max-height: 250px; overflow-y: auto; border: 1px solid #ffe3e3; }
+        .wrong-item { margin-bottom: 15px; font-size: 15px; border-bottom: 1px dashed #ffc9c9; padding-bottom: 15px; }
+        .wrong-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .correct-text { color: #20c997; font-weight: bold; background: #e6fcf5; padding: 2px 6px; border-radius: 4px; }
+        .wrong-text { color: #ff6b6b; text-decoration: line-through; background: #fff0f0; padding: 2px 6px; border-radius: 4px; }
+
+        /* 관리자 화면 */
+        #admin-screen { display: none; text-align: left; }
+        .record-card { background: white; padding: 18px; border-radius: 14px; margin-bottom: 15px; font-size: 14px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .record-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #f0f4f8; padding-bottom: 8px; font-size: 15px; }
+        .category-badge { display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+        .mode-badge { display: inline-block; background: #f1f3f5; color: #495057; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 8px; margin-left: 5px; }
+        .close-admin-btn { background: #95a5a6; box-shadow: none; }
+        .close-admin-btn:hover { background: #7f8c8d; box-shadow: none; transform: none; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div id="start-screen">
-        <h1> 영단어 TEST </h1>
-        <input type="text" id="user-name" class="input-box" placeholder="이름 입력">
-  <select id="category-select" class="input-box">
-    <option value="25년 고1 10월 모의고사">📖 25년 고1 10월 모의고사</option>
-    <option value="26년 고2 6월 모의고사">📖 26년 고1 6월 모의고사</option>
-    <option value="26년 고2 6월 모의고사">📖 26년 고2 6월 모의고사</option>
-    <option value="전체">모든 단어 섞어서 (종합)</option>
-</select>
-        <select id="mode-select" class="input-box">
-            <option value="practice"> 객관식 </option>
-            <option value="test"> 주관식 </option>
-            <option value="mixed"> 객관식/주관식혼합 </option>
+        <h1>성준T 영단어 TEST</h1>
+        
+        <div class="input-label">👤 이름</div>
+        <input type="text" id="user-name" class="input-box" placeholder="이름을 입력하세요" autocomplete="off">
+        
+        <div class="input-label">📁 단어장 선택</div>
+        <select id="category-select" class="input-box">
+            <option value="25년 고1 10월 모의고사">📖 25년 고1 10월 모의고사</option>
+            <option value="26년 고1 6월 모의고사">📖 26년 고1 6월 모의고사</option>
+            <option value="26년 고2 6월 모의고사">📖 26년 고2 6월 모의고사</option>
         </select>
+
+        <div class="input-label">🎯 시험 모드</div>
+        <select id="mode-select" class="input-box">
+            <option value="practice"> 객관식(단어 연습)</option>
+            <option value="test"> 주관식 (실전 테스트)</option>
+            <option value="mixed"> 혼합 (객관식 + 주관식)</option>
+        </select>
+
         <button class="start-btn" onclick="startQuiz()">시험 시작하기</button>
-        <button onclick="openAdmin()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">⚙️ 관리자 모드</button>
+        <button class="admin-link" onclick="openAdmin()">⚙️ 관리자 모드 접속</button>
     </div>
 
-    <div id="quiz-screen" style="display: none; flex-direction: column;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <button onclick="goBack()">⬅️ 이전</button>
-            <button onclick="togglePause()" id="pause-btn">⏸️ 일시정지</button>
-        </div>
+    <div id="quiz-screen" style="display: none; flex-direction: column; height: 100%;">
+        <h1 id="quiz-title" style="font-size: 18px;">📝 시험 진행 중</h1>
         <div class="question-box">
-            <div id="question-type" style="font-size:14px; color:#888;"></div>
-            <div id="question-text" style="font-size:30px; font-weight:bold;"></div>
+            <div class="question-type" id="question-type">질문 유형</div>
+            <div class="question-text" id="question-text">Word</div>
         </div>
-        <div id="options-container" class="options-container"></div>
-        <div id="typing-container" class="typing-container" style="display:none;">
-            <input type="text" id="typing-input" class="input-box" placeholder="정답 입력">
-            <button class="start-btn" onclick="submitTypingAnswer()">제출</button>
+        
+        <div class="options-container" id="options-container"></div>
+
+        <div class="typing-container" id="typing-container">
+            <input type="text" id="typing-input" class="input-box" placeholder="정답을 입력하세요" autocomplete="off" style="margin-bottom: 0;">
+            <button class="start-btn" style="margin-top: 0;" onclick="submitTypingAnswer()">제출하기 (Enter)</button>
         </div>
+
+        <div style="color: #888; font-size: 14px; margin-top: auto;" id="status-bar">진행 상황: 0 / 0</div>
     </div>
 
-    <div id="result-screen" style="display: none;">
-        <h2>결과 완료! 🎉</h2>
-        <p id="result-text"></p>
-        <div id="wrong-list" class="wrong-list" style="display:none;"></div>
-        <button class="start-btn" onclick="startWrongQuiz()">틀린 문제만 다시 풀기</button>
-        <button class="start-btn" style="background:#6c757d;" onclick="resetApp()">처음으로</button>
+   <div id="result-screen" style="display: none;">
+        <h2 style="color: #28a745; margin-top: 10px;">테스트 완료! 🎉</h2>
+        <p><span id="result-category" style="color:#007bff; font-weight:bold;"></span><br>수고하셨습니다, <strong id="display-name"></strong>님!</p>
+        <p>총 <span id="total-count">0</span>문제 중 <strong style="font-size: 20px;" id="correct-count">0</strong>문제를 맞췄습니다.</p>
+        
+        <div id="wrong-list-container" style="display: none;">
+            <h3 style="font-size: 16px; color: #dc3545; margin-top: 20px; text-align: left;">📖 오답 노트</h3>
+            <div class="wrong-list" id="wrong-list"></div>
+        </div>
+
+        <button class="start-btn" style="width: 100%; margin-top: 20px; background: #dc3545;" onclick="startWrongQuiz()">틀린 문제만 다시 풀기</button>
+        <button class="start-btn" style="width: 100%; margin-top: 10px;" onclick="resetApp()">처음으로 돌아가기</button>
     </div>
 
-    <div id="admin-screen" style="display: none;">
-        <h1>⚙️ 학생 기록</h1>
-        <div id="records-container"></div>
-        <button onclick="resetApp()">닫기</button>
+    <div id="admin-screen">
+        <h1>⚙️ 학생 시험 기록 (서버)</h1>
+        <div id="records-container" style="max-height: 500px; overflow-y: auto;"></div>
+        <button class="start-btn close-admin-btn" style="width: 100%;" onclick="resetApp()">닫기</button>
+        <button onclick="clearRecords()" style="width: 100%; margin-top: 10px; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 10px; cursor: pointer;">서버 기록 전체 삭제</button>
     </div>
 </div>
 
 <script>
-    const fullWordDatabase = [
-    // 📖 25년 고1 10월 모의고사 단어 리스트
+const ADMIN_PASSWORD = "sksmstjdwns2";
+const fullWordDatabase = [
+// 📖 25년 고1 10월 모의고사 단어 리스트
     { category: '25년 고1 10월 모의고사', en: 'human beings', ko: '인간' },
     { category: '25년 고1 10월 모의고사', en: 'make the most of', ko: '~을 최대한 이용하다' },
     { category: '25년 고1 10월 모의고사', en: 'subtle', ko: '미묘한' },
@@ -319,8 +404,8 @@
     { category: '25년 고1 10월 모의고사', en: 'contradictory', ko: '모순되는, 반대되는' },
     { category: '25년 고1 10월 모의고사', en: 'perpetuate', ko: '영속시키다' },
     { category: '25년 고1 10월 모의고사', en: 'flawed', ko: '결함이 있는, 잘못된' }
-
-    // 📖 26년 고1 6월 모의고사 단어 리스트
+        
+       // 📖 26년 고1 6월 모의고사 단어 리스트
     { category: '26년 고1 6월 모의고사', en: 'recognition', ko: '인정, 알아봄' },
     { category: '26년 고1 6월 모의고사', en: 'hands-on', ko: '직접 해보는, 실무의' },
     { category: '26년 고1 6월 모의고사', en: 'microscopic', ko: '극히 작은, 미시적인' },
@@ -559,7 +644,7 @@
     { category: '26년 고1 6월 모의고사', en: 'greenhouse gas', ko: '온실가스' },
     { category: '26년 고1 6월 모의고사', en: 'mindfulness', ko: '마음 챙김' }
 
-    // 📖 26년 고2 6월 모의고사 단어 리스트
+// 📖 26년 고2 6월 모의고사 단어 리스트
     { category: '26년 고2 6월 모의고사', en: 'provide for', ko: '제공하다, 대비하다' },
     { category: '26년 고2 6월 모의고사', en: 'experiment', ko: '실험' },
     { category: '26년 고2 6월 모의고사', en: 'envision', ko: '마음속에 그리다' },
@@ -810,50 +895,294 @@
     { category: '26년 고2 6월 모의고사', en: 'order', ko: '차수, 순서' },
     { category: '26년 고2 6월 모의고사', en: 'lack', ko: '~이 부족하다' }
 ];
-    let currentQuizList = [], currentQuestionIndex = 0, score = 0, currentUser = "", currentCorrectAnswer = "", incorrectWords = [];
-    let isPaused = false;
 
-    function startQuiz() {
-        currentUser = document.getElementById('user-name').value;
-        const category = document.getElementById('category-select').value;
-        currentQuizList = category === "전체" ? [...fullWordDatabase] : fullWordDatabase.filter(w => w.category === category);
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('quiz-screen').style.display = 'flex';
-        loadQuestion();
+    let currentQuizList = [];
+let currentCategoryName = "";
+let currentMode = "";
+let currentModeName = "";
+let currentQuestionIndex = 0, score = 0, currentUser = "", currentCorrectAnswer = "", incorrectWords = [];
+
+const startScreen = document.getElementById('start-screen');
+const quizScreen = document.getElementById('quiz-screen');
+const resultScreen = document.getElementById('result-screen');
+const adminScreen = document.getElementById('admin-screen');
+const nameInput = document.getElementById('user-name');
+const optionsContainer = document.getElementById('options-container');
+const typingContainer = document.getElementById('typing-container');
+const typingInput = document.getElementById('typing-input');
+
+function shuffleArray(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function resetApp() {
+  startScreen.style.display = 'flex';
+  quizScreen.style.display = 'none';
+  resultScreen.style.display = 'none';
+  adminScreen.style.display = 'none';
+  nameInput.value = "";
+}
+
+function startQuiz() {
+  const name = document.getElementById('user-name').value.trim();
+  if (!name) {
+    alert("이름을 입력해주세요!");
+    return;
+  }
+
+  const selectedCategory = document.getElementById('category-select').value;
+  const selectedMode = document.getElementById('mode-select').value;
+
+  currentCategoryName = selectedCategory;
+  currentMode = selectedMode;
+
+  if (currentMode === "practice") currentModeName = "객관식 연습";
+  else if (currentMode === "test") currentModeName = "주관식 테스트";
+  else currentModeName = "혼합 테스트";
+
+  if (selectedCategory === "전체") {
+    currentQuizList = [...fullWordDatabase];
+  } else {
+    currentQuizList = fullWordDatabase.filter(word => word.category === selectedCategory);
+  }
+
+  if (currentMode !== "test" && currentQuizList.length < 3) {
+    alert("이 카테고리에는 단어가 4개 미만이라 객관식 보기를 만들 수 없습니다.");
+    return;
+  }
+
+  shuffleArray(currentQuizList);
+  currentUser = name;
+  currentQuestionIndex = 0;
+  score = 0;
+  incorrectWords = [];
+
+  document.getElementById('quiz-title').innerText = `📝 [${selectedCategory}] ${currentModeName}`;
+  startScreen.style.display = 'none';
+  quizScreen.style.display = 'flex';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  if (currentQuestionIndex >= currentQuizList.length) {
+    endQuiz();
+    return;
+  }
+
+  const currentWord = currentQuizList[currentQuestionIndex];
+  const isEnToKo = Math.random() > 0.5;
+
+  let isMultipleChoice;
+  if (currentMode === "practice") isMultipleChoice = true;
+  else if (currentMode === "test") isMultipleChoice = false;
+  else isMultipleChoice = Math.random() > 0.5;
+
+  let questionText, correctOption;
+
+  if (isEnToKo) {
+    document.getElementById('question-type').innerText = isMultipleChoice ? "🤔 다음 영단어의 뜻은? (객관식)" : "✍️ 다음 영단어의 뜻을 입력하세요 (주관식)";
+    questionText = currentWord.en;
+    correctOption = currentWord.ko;
+  } else {
+    document.getElementById('question-type').innerText = isMultipleChoice ? "🤔 다음 뜻을 가진 영단어는? (객관식)" : "✍️ 다음 뜻을 가진 영단어를 입력하세요 (주관식)";
+    questionText = currentWord.ko;
+    correctOption = currentWord.en;
+  }
+
+  document.getElementById('question-text').innerText = questionText;
+  currentCorrectAnswer = correctOption;
+
+  if (isMultipleChoice) {
+    optionsContainer.style.display = 'flex';
+    typingContainer.style.display = 'none';
+
+    let wrongWords = currentQuizList.filter(word => word !== currentWord);
+    wrongWords = shuffleArray(wrongWords).slice(0, 3);
+    let wrongOptions = wrongWords.map(word => isEnToKo ? word.ko : word.en);
+    let allOptions = shuffleArray([correctOption, ...wrongOptions]);
+
+    optionsContainer.innerHTML = "";
+    allOptions.forEach(optionText => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerText = optionText;
+      btn.onclick = () => checkAnswer(optionText, currentWord);
+      optionsContainer.appendChild(btn);
+    });
+  } else {
+    optionsContainer.style.display = 'none';
+    typingContainer.style.display = 'flex';
+    typingInput.value = "";
+    typingInput.focus();
+  }
+
+  document.getElementById('status-bar').innerText = `진행 상황: ${currentQuestionIndex + 1} / ${currentQuizList.length}`;
+}
+
+function submitTypingAnswer() {
+  const userAnswer = typingInput.value.trim();
+  if (userAnswer === "") {
+    alert("정답을 입력해주세요!");
+    return;
+  }
+  checkAnswer(userAnswer, currentQuizList[currentQuestionIndex]);
+}
+
+typingInput.addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    submitTypingAnswer();
+  }
+});
+
+function checkAnswer(selectedOption, currentWordData) {
+  if (selectedOption.toLowerCase() === currentCorrectAnswer.toLowerCase()) {
+    score++;
+  } else {
+    incorrectWords.push({
+      word: `${currentWordData.en} (${currentWordData.ko})`,
+      studentAnswer: selectedOption,
+      correctAnswer: currentCorrectAnswer
+    });
+  }
+  currentQuestionIndex++;
+  loadQuestion();
+}
+
+function endQuiz() {
+  quizScreen.style.display = 'none';
+  resultScreen.style.display = 'block';
+  document.getElementById('display-name').innerText = currentUser;
+  document.getElementById('result-category').innerText = `[${currentCategoryName} / ${currentModeName}]`;
+  document.getElementById('total-count').innerText = currentQuizList.length;
+  document.getElementById('correct-count').innerText = score;
+
+  const wrongContainer = document.getElementById('wrong-list-container');
+  const wrongListEl = document.getElementById('wrong-list');
+  wrongListEl.innerHTML = "";
+
+  if (incorrectWords.length > 0) {
+    wrongContainer.style.display = "block";
+    incorrectWords.forEach(item => {
+      wrongListEl.innerHTML += `<div class="wrong-item"><strong>${item.word}</strong><br>내가 적은 답: <span class="wrong-text">${item.studentAnswer}</span><br>정답: <span class="correct-text">${item.correctAnswer}</span></div>`;
+    });
+  } else {
+    wrongContainer.style.display = "none";
+  }
+
+  saveRecordToServer();
+}
+
+async function saveRecordToServer() {
+  const combinedCategoryName = `${currentCategoryName} (${currentModeName})`;
+  const record = {
+    name: currentUser,
+    category: combinedCategoryName,
+    date: new Date().toLocaleString(),
+    score: score,
+    total: currentQuizList.length,
+    wrong: incorrectWords
+  };
+
+  try {
+    await fetch('/api/records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record)
+    });
+  } catch (error) {
+    console.error("서버 전송 실패:", error);
+  }
+}
+
+function openAdmin() {
+  const password = prompt("관리자 비밀번호를 입력하세요:");
+  if (password === ADMIN_PASSWORD) {
+    startScreen.style.display = 'none';
+    adminScreen.style.display = 'block';
+    // 인자를 제거하고 함수만 호출하세요
+    loadRecordsFromServer();
+  }
+}
+
+async function loadRecordsFromServer() {
+  const recordsContainer = document.getElementById('records-container');
+  recordsContainer.innerHTML = "<p>서버에서 기록을 불러오는 중...</p>";
+
+  try {
+    const response = await fetch('/api/records');
+    const savedRecords = await response.json();
+
+    recordsContainer.innerHTML = "";
+    if (savedRecords.length === 0) {
+      recordsContainer.innerHTML = "<p style='color:#888;'>아직 시험 기록이 없습니다.</p>";
+      return;
     }
 
-    function loadQuestion() {
-        if (currentQuestionIndex >= currentQuizList.length) { endQuiz(); return; }
-        const word = currentQuizList[currentQuestionIndex];
-        // ... (문제를 로드하는 로직)
-        document.getElementById('status-bar').innerText = `${currentQuestionIndex + 1} / ${currentQuizList.length}`;
-    }
+    savedRecords.slice().reverse().forEach(record => {
+      const catTextFull = record.category ? record.category : "기본 (혼합)";
+      let catBadgeText = catTextFull;
+      let modeBadgeText = "";
 
-    function togglePause() {
-        isPaused = !isPaused;
-        document.getElementById('options-container').style.filter = isPaused ? "blur(10px)" : "none";
-        document.getElementById('pause-btn').innerText = isPaused ? "▶️ 재개" : "⏸️ 일시정지";
-    }
+      if (catTextFull.includes('(') && catTextFull.endsWith(')')) {
+        const splitIndex = catTextFull.lastIndexOf('(');
+        catBadgeText = catTextFull.substring(0, splitIndex).trim();
+        modeBadgeText = catTextFull.substring(splitIndex + 1, catTextFull.length - 1);
+      }
 
-    function goBack() {
-        if (currentQuestionIndex > 0) { currentQuestionIndex--; loadQuestion(); }
-    }
+      const modeBadgeHTML = modeBadgeText ? `<span class="mode-badge">${modeBadgeText}</span>` : "";
+      const wrongHTML = record.wrong && record.wrong.length > 0
+        ? `<div style="margin-top:5px; color:#dc3545; font-size:12px;">오답: ${record.wrong.map(w => w.word.split(' ')[0]).join(', ')}</div>`
+        : `<div style="margin-top:5px; color:#28a745; font-size:12px;">백점! 🎉</div>`;
 
-    function endQuiz() {
-        document.getElementById('quiz-screen').style.display = 'none';
-        document.getElementById('result-screen').style.display = 'block';
-        // ... (결과 표시 로직)
-    }
+      recordsContainer.innerHTML += `
+        <div class="record-card">
+          <div>
+            <span class="category-badge">${catBadgeText}</span>
+            ${modeBadgeHTML}
+          </div>
+          <div class="record-header" style="margin-top: 8px;">
+            <span>👤 ${record.name}</span>
+            <span>${record.score} / ${record.total} 점</span>
+          </div>
+          <div style="font-size: 11px; color: #888;">${record.date}</div>
+          ${wrongHTML}
+        </div>`;
+    });
+  } catch (error) {
+    recordsContainer.innerHTML = "<p>기록을 불러오지 못했습니다.</p>";
+  }
+}
 
-    function startWrongQuiz() {
-        currentQuizList = incorrectWords.map(w => ({ en: w.word.split(' (')[0], ko: w.word.split('(')[1].replace(')', '') }));
-        currentQuestionIndex = 0; score = 0; incorrectWords = [];
-        document.getElementById('result-screen').style.display = 'none';
-        document.getElementById('quiz-screen').style.display = 'flex';
-        loadQuestion();
-    }
+async function clearRecords() {
+  if (confirm("모든 학생의 기록을 정말 삭제하시겠습니까? (복구 불가)")) {
+    await fetch('/api/records', { method: 'DELETE' });
+    loadRecordsFromServer();
+    alert("서버의 기록이 완전히 삭제되었습니다.");
+  }
+}
 
-    function resetApp() { location.reload(); }
+function startWrongQuiz() {
+  if (incorrectWords.length === 0) {
+    alert("틀린 문제가 없습니다!");
+    return;
+  }
+
+  currentQuizList = incorrectWords.map(item => {
+    const match = item.word.match(/(.*) \((.*)\)/);
+    return { en: match[1], ko: match[2], category: "오답 노트" };
+  });
+
+  shuffleArray(currentQuizList);
+  currentQuestionIndex = 0;
+  score = 0;
+  incorrectWords = [];
+
+  resultScreen.style.display = 'none';
+  quizScreen.style.display = 'flex';
+  document.getElementById('quiz-title').innerText = "📝 오답 다시 풀기";
+  loadQuestion();
+}
 </script>
 </body>
 </html>
