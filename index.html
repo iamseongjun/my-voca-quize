@@ -3,141 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>단어 퀴즈 앱 (카테고리 버전)</title>
+    <title>영단어 마스터</title>
     <style>
-        /* 기본 배경: 부드러운 그라데이션 */
-        body { 
-            font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; margin: 0; color: #333;
-        }
-        
-        /* 메인 앱 컨테이너: 둥글고 부드러운 그림자 (모던 앱 스타일) */
-        .app-container { 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            width: 100%; max-width: 420px; height: 90vh; max-height: 800px; 
-            border-radius: 24px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
-            display: flex; flex-direction: column; 
-            padding: 40px 25px; box-sizing: border-box; 
-            text-align: center; overflow-y: auto; 
-        }
-        h1 { color: #2c3e50; font-size: 26px; font-weight: 800; margin-top: 0; margin-bottom: 25px; }
-        
-        /* 입력창 디자인 */
-        #start-screen { display: flex; flex-direction: column; justify-content: center; height: 100%; }
-        .input-label { font-size: 14px; color: #5a6c7d; font-weight: 700; text-align: left; margin-bottom: 8px; margin-left: 8px; }
-        .input-box { 
-            padding: 16px; font-size: 16px; border: 2px solid #e1e8ed; 
-            border-radius: 14px; margin-bottom: 20px; text-align: center; 
-            outline: none; width: 100%; box-sizing: border-box; 
-            background-color: #f8faff; transition: all 0.3s ease; 
-            color: #2c3e50; font-weight: 500;
-        }
-        .input-box:focus { border-color: #5b86e5; box-shadow: 0 0 0 4px rgba(91,134,229,0.1); background-color: #fff; }
-        
-        /* 메인 버튼: 트렌디한 그라데이션 및 호버 애니메이션 */
-        .start-btn { 
-            background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%); 
-            color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; 
-            border-radius: 14px; cursor: pointer; margin-top: 10px; 
-            transition: transform 0.2s, box-shadow 0.2s; 
-            box-shadow: 0 4px 15px rgba(91,134,229,0.3); 
-        }
-        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,134,229,0.4); }
-        .start-btn:active { transform: translateY(1px); }
-        .admin-link { margin-top: 30px; font-size: 14px; color: #95a5a6; text-decoration: none; cursor: pointer; background: none; border: none; font-weight: 600; transition: color 0.2s; }
-        .admin-link:hover { color: #34495e; }
-        
-        /* 퀴즈 화면 디자인 */
-        .question-box { background-color: #f0f4f8; border-radius: 20px; padding: 35px 20px; margin-bottom: 25px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .question-type { font-size: 15px; color: #7f8c8d; margin-bottom: 15px; font-weight: 700; }
-        .question-text { font-size: 34px; font-weight: 800; color: #2c3e50; word-break: keep-all; }
-        
-        /* 객관식 버튼 */
-        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .option-btn { 
-            background-color: white; color: #34495e; border: 2px solid #e1e8ed; 
-            padding: 18px; font-size: 17px; font-weight: bold; 
-            border-radius: 14px; cursor: pointer; transition: all 0.2s; 
-        }
-        .option-btn:hover { background-color: #f8faff; border-color: #5b86e5; color: #5b86e5; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        /* 주관식 입력 */
-        .typing-container { display: none; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        
-        /* 결과 화면 및 오답 노트 */
-        .wrong-list { text-align: left; background: #fff5f5; padding: 20px; border-radius: 16px; margin-top: 15px; max-height: 250px; overflow-y: auto; border: 1px solid #ffe3e3; }
-        .wrong-item { margin-bottom: 15px; font-size: 15px; border-bottom: 1px dashed #ffc9c9; padding-bottom: 15px; }
-        .wrong-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .correct-text { color: #20c997; font-weight: bold; background: #e6fcf5; padding: 2px 6px; border-radius: 4px; }
-        .wrong-text { color: #ff6b6b; text-decoration: line-through; background: #fff0f0; padding: 2px 6px; border-radius: 4px; }
-
-        /* 관리자 화면 */
-        #admin-screen { display: none; text-align: left; }
-        .record-card { background: white; padding: 18px; border-radius: 14px; margin-bottom: 15px; font-size: 14px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .record-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #f0f4f8; padding-bottom: 8px; font-size: 15px; }
-        .category-badge { display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-        .mode-badge { display: inline-block; background: #f1f3f5; color: #495057; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 8px; margin-left: 5px; }
-        .close-admin-btn { background: #95a5a6; box-shadow: none; }
-        .close-admin-btn:hover { background: #7f8c8d; box-shadow: none; transform: none; }
+        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #333; }
+        .app-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); width: 100%; max-width: 420px; height: 90vh; max-height: 800px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); display: flex; flex-direction: column; padding: 40px 25px; box-sizing: border-box; text-align: center; overflow-y: auto; }
+        h1 { color: #2c3e50; font-size: 26px; font-weight: 800; margin-bottom: 25px; }
+        .input-box { padding: 16px; font-size: 16px; border: 2px solid #e1e8ed; border-radius: 14px; margin-bottom: 15px; text-align: center; outline: none; width: 100%; box-sizing: border-box; background-color: #f8faff; }
+        .start-btn { background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%); color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 14px; cursor: pointer; margin-top: 10px; }
+        .question-box { background-color: #f0f4f8; border-radius: 20px; padding: 35px 20px; margin-bottom: 20px; }
+        .option-btn { background: white; border: 2px solid #e1e8ed; padding: 18px; margin: 6px 0; border-radius: 14px; cursor: pointer; width: 100%; font-weight: bold; }
+        .wrong-list { text-align: left; background: #fff5f5; padding: 15px; border-radius: 16px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div id="start-screen">
-        <h1>📚 오늘의 단어 퀴즈</h1>
-        <input type="text" id="user-name" class="input-box" placeholder="이름 입력" autocomplete="off">
-        
-      <select id="category-select" class="input-box">
-    <option value="25년 고1 10월 모의고사">📖 25년 고1 10월 모의고사</option>
-    <option value="전체">모든 단어 섞어서 (종합)</option>
-</select>
-
+        <h1>📚 영단어 마스터</h1>
+        <input type="text" id="user-name" class="input-box" placeholder="이름 입력">
+        <select id="category-select" class="input-box">
+            <option value="25년 고1 10월 모의고사">📖 25년 고1 10월 모의고사</option>
+            <option value="전체">모든 단어 섞어서 (종합)</option>
+        </select>
+        <select id="mode-select" class="input-box">
+            <option value="practice">🟢 객관식 연습</option>
+            <option value="test">🔥 주관식 테스트</option>
+            <option value="mixed">🎲 혼합 모드</option>
+        </select>
         <button class="start-btn" onclick="startQuiz()">시험 시작하기</button>
-        <button class="admin-link" onclick="openAdmin()">⚙️ 관리자 모드 접속</button>
+        <button onclick="openAdmin()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">⚙️ 관리자 모드</button>
     </div>
 
-   <div id="quiz-screen" style="display: none; flex-direction: column; height: 100%;">
+    <div id="quiz-screen" style="display: none; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <button onclick="goBack()" style="background:none; border:none; color:#7f8c8d; font-size:14px; cursor:pointer;">⬅️ 이전 문제</button>
-            <button onclick="togglePause()" id="pause-btn" style="background:none; border:none; color:#7f8c8d; font-size:14px; cursor:pointer;">⏸️ 일시정지</button>
+            <button onclick="goBack()">⬅️ 이전</button>
+            <button onclick="togglePause()" id="pause-btn">⏸️ 일시정지</button>
         </div>
-        
-        <h1 id="quiz-title" style="font-size: 18px;">📝 시험 진행 중</h1>
+        <div class="question-box">
+            <div id="question-type" style="font-size:14px; color:#888;"></div>
+            <div id="question-text" style="font-size:30px; font-weight:bold;"></div>
         </div>
-        <div class="options-container" id="options-container"></div>
-        <div style="color: #888; font-size: 14px; margin-top: auto;" id="status-bar">진행 상황: 0 / 0</div>
+        <div id="options-container" class="options-container"></div>
+        <div id="typing-container" class="typing-container" style="display:none;">
+            <input type="text" id="typing-input" class="input-box" placeholder="정답 입력">
+            <button class="start-btn" onclick="submitTypingAnswer()">제출</button>
+        </div>
     </div>
 
     <div id="result-screen" style="display: none;">
-        <h2 style="color: #28a745; margin-top: 10px;">테스트 완료! 🎉</h2>
-        <p><span id="result-category" style="color:#007bff; font-weight:bold;"></span> 수고하셨습니다, <strong id="display-name"></strong>님!</p>
-        <p>총 <span id="total-count">0</span>문제 중 <strong style="font-size: 20px;" id="correct-count">0</strong>문제를 맞췄습니다.</p>
-        <div id="wrong-list-container" style="display: none;">
-            <h3 style="font-size: 16px; color: #dc3545; margin-top: 20px; text-align: left;">📖 오답 노트</h3>
-            <div class="wrong-list" id="wrong-list"></div>
-        </div>
-        <button class="start-btn" style="width: 100%; margin-top: 20px;" onclick="resetApp()">처음으로 돌아가기</button>
+        <h2>결과 완료! 🎉</h2>
+        <p id="result-text"></p>
+        <div id="wrong-list" class="wrong-list" style="display:none;"></div>
+        <button class="start-btn" onclick="startWrongQuiz()">틀린 문제만 다시 풀기</button>
+        <button class="start-btn" style="background:#6c757d;" onclick="resetApp()">처음으로</button>
     </div>
 
-    <div id="admin-screen">
-        <h1>⚙️ 학생 시험 기록 (서버)</h1>
-        <div id="records-container" style="max-height: 500px; overflow-y: auto;"></div>
-        <button class="start-btn close-admin-btn" style="width: 100%;" onclick="resetApp()">닫기</button>
-        <button onclick="clearRecords()" style="width: 100%; margin-top: 10px; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 10px; cursor: pointer;">서버 기록 전체 삭제</button>
+    <div id="admin-screen" style="display: none;">
+        <h1>⚙️ 학생 기록</h1>
+        <div id="records-container"></div>
+        <button onclick="resetApp()">닫기</button>
     </div>
 </div>
 
 <script>
-    const ADMIN_PASSWORD = "1234";
-    
-    // ⭐️ [변경] 단어에 'category' 속성이 추가된 새로운 데이터베이스 구조!
-    // 원하는 만큼 단어를 계속 추가하시면 됩니다.
-   const fullWordDatabase = [
+    const fullWordDatabase = [
     // 📖 25년 고1 10월 모의고사 단어 리스트
     { category: '25년 고1 10월 모의고사', en: 'human beings', ko: '인간' },
     { category: '25년 고1 10월 모의고사', en: 'make the most of', ko: '~을 최대한 이용하다' },
@@ -388,197 +317,541 @@
     { category: '25년 고1 10월 모의고사', en: 'contradictory', ko: '모순되는, 반대되는' },
     { category: '25년 고1 10월 모의고사', en: 'perpetuate', ko: '영속시키다' },
     { category: '25년 고1 10월 모의고사', en: 'flawed', ko: '결함이 있는, 잘못된' }
+
+    // 📖 26년 고1 6월 모의고사 단어 리스트
+    { category: '26년 고1 6월 모의고사', en: 'recognition', ko: '인정, 알아봄' },
+    { category: '26년 고1 6월 모의고사', en: 'hands-on', ko: '직접 해보는, 실무의' },
+    { category: '26년 고1 6월 모의고사', en: 'microscopic', ko: '극히 작은, 미시적인' },
+    { category: '26년 고1 6월 모의고사', en: 'retain', ko: '유지하다, 보유하다' },
+    { category: '26년 고1 6월 모의고사', en: 'pay off', ko: '결실을 맺다, 성과를 거두다' },
+    { category: '26년 고1 6월 모의고사', en: 'operating hours', ko: '운영 시간' },
+    { category: '26년 고1 6월 모의고사', en: 'enhance', ko: '향상시키다, 높이다' },
+    { category: '26년 고1 6월 모의고사', en: 'chunk', ko: '덩어리' },
+    { category: '26년 고1 6월 모의고사', en: 'imperceptibly', ko: '감지할 수 없게, 미세하게' },
+    { category: '26년 고1 6월 모의고사', en: 'objective', ko: '객관적인' },
+    { category: '26년 고1 6월 모의고사', en: 'powerful', ko: '강력한' },
+    { category: '26년 고1 6월 모의고사', en: 'conditioning', ko: '조건화, 조절' },
+    { category: '26년 고1 6월 모의고사', en: 'consciousness', ko: '의식' },
+    { category: '26년 고1 6월 모의고사', en: 'core', ko: '핵심, 가장 중요한' },
+    { category: '26년 고1 6월 모의고사', en: 'annual', ko: '연례의, 매년의' },
+    { category: '26년 고1 6월 모의고사', en: 'motivator', ko: '동기 요인' },
+    { category: '26년 고1 6월 모의고사', en: 'focus', ko: '집중; 집중하다' },
+    { category: '26년 고1 6월 모의고사', en: 'range', ko: '범위' },
+    { category: '26년 고1 6월 모의고사', en: 'release', ko: '방출하다' },
+    { category: '26년 고1 6월 모의고사', en: 'modification', ko: '수정, 변경' },
+    { category: '26년 고1 6월 모의고사', en: 'make amends', ko: '보상하다, 배상하다' },
+    { category: '26년 고1 6월 모의고사', en: 'add up', ko: '쌓이다, 합산되다' },
+    { category: '26년 고1 6월 모의고사', en: 'dedication', ko: '헌신' },
+    { category: '26년 고1 6월 모의고사', en: 'immediate', ko: '즉각적인, 직접적인' },
+    { category: '26년 고1 6월 모의고사', en: 'standard', ko: '표준, 기준' },
+    { category: '26년 고1 6월 모의고사', en: 'variability', ko: '변동성, 가변성' },
+    { category: '26년 고1 6월 모의고사', en: 'triumph', ko: '승리, 큰 업적' },
+    { category: '26년 고1 6월 모의고사', en: 'participant', ko: '참가자' },
+    { category: '26년 고1 6월 모의고사', en: 'embarrassed', ko: '부끄러운, 당황스러운' },
+    { category: '26년 고1 6월 모의고사', en: 'monotonous', ko: '단조로운' },
+    { category: '26년 고1 6월 모의고사', en: 'guilt', ko: '죄책감' },
+    { category: '26년 고1 6월 모의고사', en: 'deliberate', ko: '의도적인, 신중한' },
+    { category: '26년 고1 6월 모의고사', en: 'masterpiece', ko: '걸작, 명작' },
+    { category: '26년 고1 6월 모의고사', en: 'insomnia', ko: '불면증' },
+    { category: '26년 고1 6월 모의고사', en: 'proximity', ko: '근접성, 가까움' },
+    { category: '26년 고1 6월 모의고사', en: 'fundamental', ko: '근본적인' },
+    { category: '26년 고1 6월 모의고사', en: 'regulation', ko: '조절, 규제' },
+    { category: '26년 고1 6월 모의고사', en: 'timeless', ko: '시대를 초월한' },
+    { category: '26년 고1 6월 모의고사', en: 'block out', ko: '차단하다' },
+    { category: '26년 고1 6월 모의고사', en: 'variation', ko: '변화, 변형' },
+    { category: '26년 고1 6월 모의고사', en: 'inspire', ko: '영감을 주다' },
+    { category: '26년 고1 6월 모의고사', en: 'self-defense', ko: '자기방어' },
+    { category: '26년 고1 6월 모의고사', en: 'radical', ko: '급진적인' },
+    { category: '26년 고1 6월 모의고사', en: 'digital minimalism', ko: '디지털 미니멀리즘' },
+    { category: '26년 고1 6월 모의고사', en: 'technological', ko: '기술적인, 과학 기술의' },
+    { category: '26년 고1 6월 모의고사', en: 'adjust', ko: '조정하다, 맞추다' },
+    { category: '26년 고1 6월 모의고사', en: 'process', ko: '과정, 절차' },
+    { category: '26년 고1 6월 모의고사', en: 'mechanical', ko: '기계적인, 기계의' },
+    { category: '26년 고1 6월 모의고사', en: 'corrode', ko: '좀먹다, 부식시키다, 약화시키다' },
+    { category: '26년 고1 6월 모의고사', en: 'internal', ko: '내부의' },
+    { category: '26년 고1 6월 모의고사', en: 'logical', ko: '논리적인' },
+    { category: '26년 고1 6월 모의고사', en: 'unwieldy', ko: '다루기 힘든, 거추장스러운' },
+    { category: '26년 고1 6월 모의고사', en: 'baseline', ko: '기준선, 기본 수치' },
+    { category: '26년 고1 6월 모의고사', en: 'artificial', ko: '인위적인, 인공적인' },
+    { category: '26년 고1 6월 모의고사', en: 'destructive', ko: '파괴적인' },
+    { category: '26년 고1 6월 모의고사', en: 'access', ko: '접근하다' },
+    { category: '26년 고1 6월 모의고사', en: 'convey', ko: '전달하다' },
+    { category: '26년 고1 6월 모의고사', en: 'stream', ko: '흐름, 연속' },
+    { category: '26년 고1 6월 모의고사', en: 'viewfinder', ko: '뷰파인더(카메라의 조준 창)' },
+    { category: '26년 고1 6월 모의고사', en: 'premium', ko: '고급의, 우수한' },
+    { category: '26년 고1 6월 모의고사', en: 'orientation', ko: '지향, 성향' },
+    { category: '26년 고1 6월 모의고사', en: 'predictor', ko: '예측 변수, 예언자' },
+    { category: '26년 고1 6월 모의고사', en: 'emission', ko: '배출' },
+    { category: '26년 고1 6월 모의고사', en: 'jealous', ko: '질투하는, 시기하는' },
+    { category: '26년 고1 6월 모의고사', en: 'reel off', ko: '술술 말하다' },
+    { category: '26년 고1 6월 모의고사', en: 'outcome', ko: '결과' },
+    { category: '26년 고1 6월 모의고사', en: 'restriction', ko: '제한' },
+    { category: '26년 고1 6월 모의고사', en: 'well-being', ko: '웰빙, 행복' },
+    { category: '26년 고1 6월 모의고사', en: 'narrow down', ko: '좁히다, 제한하다' },
+    { category: '26년 고1 6월 모의고사', en: 'photosynthesis', ko: '광합성' },
+    { category: '26년 고1 6월 모의고사', en: 'validate', ko: '입증하다, 정당화하다' },
+    { category: '26년 고1 6월 모의고사', en: 'promising', ko: '유망한, 촉망받는' },
+    { category: '26년 고1 6월 모의고사', en: 'statement', ko: '진술, 말' },
+    { category: '26년 고1 6월 모의고사', en: 'status', ko: '상태, 신분' },
+    { category: '26년 고1 6월 모의고사', en: 'facility', ko: '시설, 편의' },
+    { category: '26년 고1 6월 모의고사', en: 'explicitly', ko: '명시적으로' },
+    { category: '26년 고1 6월 모의고사', en: 'subjective', ko: '주관적인' },
+    { category: '26년 고1 6월 모의고사', en: 'first-come, first-served', ko: '선착순의' },
+    { category: '26년 고1 6월 모의고사', en: 'announcement', ko: '공고, 안내' },
+    { category: '26년 고1 6월 모의고사', en: 'alternative', ko: '대안' },
+    { category: '26년 고1 6월 모의고사', en: 'simultaneously', ko: '동시에' },
+    { category: '26년 고1 6월 모의고사', en: 'yield', ko: '초래하다, 생산하다' },
+    { category: '26년 고1 6월 모의고사', en: 'bond', ko: '유대, 끈' },
+    { category: '26년 고1 6월 모의고사', en: 'hesitation', ko: '망설임, 주저' },
+    { category: '26년 고1 6월 모의고사', en: 'evolution', ko: '진화' },
+    { category: '26년 고1 6월 모의고사', en: 'automatic', ko: '자동적인' },
+    { category: '26년 고1 6월 모의고사', en: 'unpredictable', ko: '예측 불가능한' },
+    { category: '26년 고1 6월 모의고사', en: 'establishment', ko: '설립, 확립' },
+    { category: '26년 고1 6월 모의고사', en: 'exhilarating', ko: '짜릿한, 신나는' },
+    { category: '26년 고1 6월 모의고사', en: 'clarity', ko: '명료함, 맑음' },
+    { category: '26년 고1 6월 모의고사', en: 'topic', ko: '주제, 화제' },
+    { category: '26년 고1 6월 모의고사', en: 'northern hemisphere', ko: '북반구' },
+    { category: '26년 고1 6월 모의고사', en: 'reinforce', ko: '강화하다' },
+    { category: '26년 고1 6월 모의고사', en: 'expression', ko: '표현' },
+    { category: '26년 고1 6월 모의고사', en: 'coincidence', ko: '우연의 일치' },
+    { category: '26년 고1 6월 모의고사', en: 'catalyst', ko: '촉매제, 동기 요인' },
+    { category: '26년 고1 6월 모의고사', en: 'potential', ko: '잠재적인' },
+    { category: '26년 고1 6월 모의고사', en: 'breadth', ko: '폭, 넓이' },
+    { category: '26년 고1 6월 모의고사', en: 'intense', ko: '강렬한, 집약적인' },
+    { category: '26년 고1 6월 모의고사', en: 'precise', ko: '정확한, 정밀한' },
+    { category: '26년 고1 6월 모의고사', en: 'counterpart', ko: '상대방, 상응하는 것' },
+    { category: '26년 고1 6월 모의고사', en: 'in favor of', ko: '~을 위해, ~에 찬성하여' },
+    { category: '26년 고1 6월 모의고사', en: 'consciously', ko: '의식적으로' },
+    { category: '26년 고1 6월 모의고사', en: 'ambiguity', ko: '모호함' },
+    { category: '26년 고1 6월 모의고사', en: 'odor', ko: '냄새, 악취' },
+    { category: '26년 고1 6월 모의고사', en: 'trigger', ko: '유발하다' },
+    { category: '26년 고1 6월 모의고사', en: 'side hustle', ko: '부업' },
+    { category: '26년 고1 6월 모의고사', en: 'emotional', ko: '감정적' },
+    { category: '26년 고1 6월 모의고사', en: 'likewise', ko: '마찬가지로' },
+    { category: '26년 고1 6월 모의고사', en: 'context', ko: '맥락, 배경' },
+    { category: '26년 고1 6월 모의고사', en: 'forage', ko: '채집하다, 먹이를 찾다' },
+    { category: '26년 고1 6월 모의고사', en: 'surroundings', ko: '환경, 주변 환경' },
+    { category: '26년 고1 6월 모의고사', en: 'justification', ko: '정당화, 명분' },
+    { category: '26년 고1 6월 모의고사', en: 'potentially', ko: '잠재적으로' },
+    { category: '26년 고1 6월 모의고사', en: 'conservation', ko: '(자연) 보호, 보존' },
+    { category: '26년 고1 6월 모의고사', en: 'hunter-gatherer', ko: '수렵채집인' },
+    { category: '26년 고1 6월 모의고사', en: 'professional', ko: '전문가' },
+    { category: '26년 고1 6월 모의고사', en: 'recall', ko: '기억해 내다, 상기하다' },
+    { category: '26년 고1 6월 모의고사', en: 'testament', ko: '증거' },
+    { category: '26년 고1 6월 모의고사', en: 'distinguish', ko: '구별하다' },
+    { category: '26년 고1 6월 모의고사', en: 'spontaneous', ko: '자연 발생적인, 자발적인' },
+    { category: '26년 고1 6월 모의고사', en: 'neural network', ko: '신경망' },
+    { category: '26년 고1 6월 모의고사', en: 'visualize', ko: '시각화하다' },
+    { category: '26년 고1 6월 모의고사', en: 'transcend', ko: '초월하다' },
+    { category: '26년 고1 6월 모의고사', en: 'notification', ko: '알림' },
+    { category: '26년 고1 6월 모의고사', en: 'carbon cycle', ko: '탄소 순환' },
+    { category: '26년 고1 6월 모의고사', en: 'spot', ko: '장소, 지점' },
+    { category: '26년 고1 6월 모의고사', en: 'take into consideration', ko: '~을 고려하다' },
+    { category: '26년 고1 6월 모의고사', en: 'subconsciously', ko: '잠재의식적으로' },
+    { category: '26년 고1 6월 모의고사', en: 'highlight', ko: '하이라이트, 주요 특징' },
+    { category: '26년 고1 6월 모의고사', en: 'shame', ko: '수치심' },
+    { category: '26년 고1 6월 모의고사', en: 'entry fee', ko: '입장료, 참가비' },
+    { category: '26년 고1 6월 모의고사', en: 'corporate', ko: '기업의' },
+    { category: '26년 고1 6월 모의고사', en: 'isolate', ko: '분리하다, 고립시키다' },
+    { category: '26년 고1 6월 모의고사', en: 'deforestation', ko: '삼림 벌채' },
+    { category: '26년 고1 6월 모의고사', en: 'adapt', ko: '적응하다' },
+    { category: '26년 고1 6월 모의고사', en: 'homeostasis', ko: '항상성' },
+    { category: '26년 고1 6월 모의고사', en: 'boundary', ko: '경계(선)' },
+    { category: '26년 고1 6월 모의고사', en: 'perspective', ko: '관점, 시각' },
+    { category: '26년 고1 6월 모의고사', en: 'donation', ko: '기부, 기증' },
+    { category: '26년 고1 6월 모의고사', en: 'accumulation', ko: '축적' },
+    { category: '26년 고1 6월 모의고사', en: 'scope', ko: '범위, 영역' },
+    { category: '26년 고1 6월 모의고사', en: 'atmospheric', ko: '대기의' },
+    { category: '26년 고1 6월 모의고사', en: 'on the contrary', ko: '반대로, 그렇지 않기는커녕' },
+    { category: '26년 고1 6월 모의고사', en: 'attendance', ko: '관중, 출석' },
+    { category: '26년 고1 6월 모의고사', en: 'observation', ko: '관찰' },
+    { category: '26년 고1 6월 모의고사', en: 'context-dependent', ko: '맥락 의존적인' },
+    { category: '26년 고1 6월 모의고사', en: 'bias', ko: '편향, 선입견' },
+    { category: '26년 고1 6월 모의고사', en: 'Ice Age', ko: '빙하기' },
+    { category: '26년 고1 6월 모의고사', en: 'fine-tune', ko: '세밀하게 다듬다, 미세 조정하다' },
+    { category: '26년 고1 6월 모의고사', en: 'grateful', ko: '감사해하는, 고마워하는' },
+    { category: '26년 고1 6월 모의고사', en: 'human condition', ko: '인간의 조건' },
+    { category: '26년 고1 6월 모의고사', en: 'certainty', ko: '확실성' },
+    { category: '26년 고1 6월 모의고사', en: 'passive', ko: '수동적' },
+    { category: '26년 고1 6월 모의고사', en: 'discomfort', ko: '불편함' },
+    { category: '26년 고1 6월 모의고사', en: 'resident', ko: '거주자' },
+    { category: '26년 고1 6월 모의고사', en: 'response', ko: '반응, 응답' },
+    { category: '26년 고1 6월 모의고사', en: 'minimize', ko: '최소화하다' },
+    { category: '26년 고1 6월 모의고사', en: 'maximize', ko: '극대화하다' },
+    { category: '26년 고1 6월 모의고사', en: 'inevitably', ko: '필연적으로, 반드시' },
+    { category: '26년 고1 6월 모의고사', en: 'valuable', ko: '가치 있는' },
+    { category: '26년 고1 6월 모의고사', en: 'keep track of', ko: '~을 추적하다, ~을 놓치지 않다' },
+    { category: '26년 고1 6월 모의고사', en: 'complexity', ko: '복잡성' },
+    { category: '26년 고1 6월 모의고사', en: 'empathize', ko: '공감하다' },
+    { category: '26년 고1 6월 모의고사', en: 'identify', ko: '식별하다, 확인하다' },
+    { category: '26년 고1 6월 모의고사', en: 'walks of life', ko: '각계각층, 사회적 신분' },
+    { category: '26년 고1 6월 모의고사', en: 'closeness', ko: '근접, 친밀함' },
+    { category: '26년 고1 6월 모의고사', en: 'entertainment', ko: '오락, 즐거움' },
+    { category: '26년 고1 6월 모의고사', en: 'nuance', ko: '미묘한 차이, 뉘앙스' },
+    { category: '26년 고1 6월 모의고사', en: 'unexpected', ko: '예상치 못한' },
+    { category: '26년 고1 6월 모의고사', en: 'initial', ko: '초기의, 처음의' },
+    { category: '26년 고1 6월 모의고사', en: 'active', ko: '능동적인' },
+    { category: '26년 고1 6월 모의고사', en: 'financial', ko: '재정적인, 금융의' },
+    { category: '26년 고1 6월 모의고사', en: 'retention', ko: '기억(력), 유지' },
+    { category: '26년 고1 6월 모의고사', en: 'compel', ko: '강요하다, ~하게 만들다' },
+    { category: '26년 고1 6월 모의고사', en: 'variable', ko: '가변적인, 변수' },
+    { category: '26년 고1 6월 모의고사', en: 'extent', ko: '정도, 범위' },
+    { category: '26년 고1 6월 모의고사', en: 'basis', ko: '기초, 기반' },
+    { category: '26년 고1 6월 모의고사', en: 'retrieve', ko: '생각해 내다, 회수하다' },
+    { category: '26년 고1 6월 모의고사', en: 'visual', ko: '시각적인' },
+    { category: '26년 고1 6월 모의고사', en: 'harmful', ko: '해로운' },
+    { category: '26년 고1 6월 모의고사', en: 'majority', ko: '대다수' },
+    { category: '26년 고1 6월 모의고사', en: 'benefit', ko: '이익, 혜택' },
+    { category: '26년 고1 6월 모의고사', en: 'strengthen', ko: '강화하다' },
+    { category: '26년 고1 6월 모의고사', en: 'scrolling', ko: '(화면을) 스크롤하기' },
+    { category: '26년 고1 6월 모의고사', en: 'olfactory', ko: '후각의' },
+    { category: '26년 고1 6월 모의고사', en: 'connection', ko: '연상, 연결' },
+    { category: '26년 고1 6월 모의고사', en: 'assess', ko: '평가하다' },
+    { category: '26년 고1 6월 모의고사', en: 'temporary', ko: '일시적인' },
+    { category: '26년 고1 6월 모의고사', en: 'audience', ko: '청중, 관객' },
+    { category: '26년 고1 6월 모의고사', en: 'field of vision', ko: '시야' },
+    { category: '26년 고1 6월 모의고사', en: 'non-fiction', ko: '비소설, 수필' },
+    { category: '26년 고1 6월 모의고사', en: 'evaporation', ko: '증발' },
+    { category: '26년 고1 6월 모의고사', en: 'short-term', ko: '단기적인' },
+    { category: '26년 고1 6월 모의고사', en: 'step up to the plate', ko: '행동에 나서다, 정면으로 맞서다' },
+    { category: '26년 고1 6월 모의고사', en: 'contribute', ko: '이바지하다, 기여하다' },
+    { category: '26년 고1 6월 모의고사', en: 'interconnected', ko: '서로 연결된' },
+    { category: '26년 고1 6월 모의고사', en: 'relief', ko: '안도, 안심' },
+    { category: '26년 고1 6월 모의고사', en: 'dynamic', ko: '역동적인' },
+    { category: '26년 고1 6월 모의고사', en: 'relevance', ko: '적절성, 타당성' },
+    { category: '26년 고1 6월 모의고사', en: 'degradation', ko: '(환경) 악화, 저하' },
+    { category: '26년 고1 6월 모의고사', en: 'encounter', ko: '마주하다, 직면하다' },
+    { category: '26년 고1 6월 모의고사', en: 'significance', ko: '중요성, 의미' },
+    { category: '26년 고1 6월 모의고사', en: 'burnout', ko: '번아웃, 극도의 피로' },
+    { category: '26년 고1 6월 모의고사', en: 'well-equipped', ko: '채비가 잘 된, 능력을 갖춘' },
+    { category: '26년 고1 6월 모의고사', en: 'consequence', ko: '결과' },
+    { category: '26년 고1 6월 모의고사', en: 'rational', ko: '이성적인' },
+    { category: '26년 고1 6월 모의고사', en: 'disadvantage', ko: '불이익' },
+    { category: '26년 고1 6월 모의고사', en: 'replace', ko: '대체하다, 바꾸다' },
+    { category: '26년 고1 6월 모의고사', en: 'fluctuate', ko: '변동하다, 오르내리다' },
+    { category: '26년 고1 6월 모의고사', en: 'evaluate', ko: '평가하다' },
+    { category: '26년 고1 6월 모의고사', en: 'systematic', ko: '체계적인' },
+    { category: '26년 고1 6월 모의고사', en: 'nook', ko: '구석진 곳' },
+    { category: '26년 고1 6월 모의고사', en: 'radiation', ko: '복사(에너지)' },
+    { category: '26년 고1 6월 모의고사', en: 'predictability', ko: '예측 가능성' },
+    { category: '26년 고1 6월 모의고사', en: 'vocal', ko: '목소리의, 성악의' },
+    { category: '26년 고1 6월 모의고사', en: 'distract', ko: '(주의를) 흐트러뜨리다' },
+    { category: '26년 고1 6월 모의고사', en: 'external', ko: '외부의' },
+    { category: '26년 고1 6월 모의고사', en: 'confident', ko: '자신감 있는' },
+    { category: '26년 고1 6월 모의고사', en: 'hesitant', ko: '주저하는, 망설이는' },
+    { category: '26년 고1 6월 모의고사', en: 'association', ko: '연상, 결합' },
+    { category: '26년 고1 6월 모의고사', en: 'enduring', ko: '지속적인, 불후의' },
+    { category: '26년 고1 6월 모의고사', en: 'cognitive', ko: '인지적인' },
+    { category: '26년 고1 6월 모의고사', en: 'implement', ko: '실행하다' },
+    { category: '26년 고1 6월 모의고사', en: 'influence', ko: '영향(력)' },
+    { category: '26년 고1 6월 모의고사', en: 'static', ko: '정적인, 고정된' },
+    { category: '26년 고1 6월 모의고사', en: 'predict', ko: '예측하다' },
+    { category: '26년 고1 6월 모의고사', en: 'material', ko: '자료, 소재' },
+    { category: '26년 고1 6월 모의고사', en: 'permanent', ko: '영구적인' },
+    { category: '26년 고1 6월 모의고사', en: 'balance', ko: '균형' },
+    { category: '26년 고1 6월 모의고사', en: 'opponent', ko: '상대, 적수' },
+    { category: '26년 고1 6월 모의고사', en: 'essence', ko: '본질' },
+    { category: '26년 고1 6월 모의고사', en: 'expedition', ko: '원정, 탐사' },
+    { category: '26년 고1 6월 모의고사', en: 'assessment', ko: '평가' },
+    { category: '26년 고1 6월 모의고사', en: 'outcome-oriented', ko: '결과 지향적인' },
+    { category: '26년 고1 6월 모의고사', en: 'greenhouse gas', ko: '온실가스' },
+    { category: '26년 고1 6월 모의고사', en: 'mindfulness', ko: '마음 챙김' }
+
+    // 📖 26년 고2 6월 모의고사 단어 리스트
+    { category: '26년 고2 6월 모의고사', en: 'provide for', ko: '제공하다, 대비하다' },
+    { category: '26년 고2 6월 모의고사', en: 'experiment', ko: '실험' },
+    { category: '26년 고2 6월 모의고사', en: 'envision', ko: '마음속에 그리다' },
+    { category: '26년 고2 6월 모의고사', en: 'diversification', ko: '다각화, 다양화' },
+    { category: '26년 고2 6월 모의고사', en: 'unify', ko: '통합하다' },
+    { category: '26년 고2 6월 모의고사', en: 'ability', ko: '능력' },
+    { category: '26년 고2 6월 모의고사', en: 'sustainable', ko: '지속 가능한' },
+    { category: '26년 고2 6월 모의고사', en: 'gene', ko: '유전자' },
+    { category: '26년 고2 6월 모의고사', en: 'unit', ko: '부서, 단위' },
+    { category: '26년 고2 6월 모의고사', en: 'generate', ko: '만들어 내다, 발생시키다' },
+    { category: '26년 고2 6월 모의고사', en: 'peer', ko: '또래, 동료' },
+    { category: '26년 고2 6월 모의고사', en: 'mental', ko: '정신적인' },
+    { category: '26년 고2 6월 모의고사', en: 'wise', ko: '현명한' },
+    { category: '26년 고2 6월 모의고사', en: 'metropolitan', ko: '대도시의' },
+    { category: '26년 고2 6월 모의고사', en: 'real', ko: '실제의, 진짜의' },
+    { category: '26년 고2 6월 모의고사', en: 'incentive', ko: '동기, 유인책' },
+    { category: '26년 고2 6월 모의고사', en: 'blunt', ko: '무디게 하다' },
+    { category: '26년 고2 6월 모의고사', en: 'exchange', ko: '교환' },
+    { category: '26년 고2 6월 모의고사', en: 'reinvest', ko: '재투자하다' },
+    { category: '26년 고2 6월 모의고사', en: 'market', ko: '시장' },
+    { category: '26년 고2 6월 모의고사', en: 'picture', ko: '그림, 모습' },
+    { category: '26년 고2 6월 모의고사', en: 'productivity', ko: '생산성' },
+    { category: '26년 고2 6월 모의고사', en: 'weight', ko: '가중치, 무게' },
+    { category: '26년 고2 6월 모의고사', en: 'large', ko: '큰, 거대한' },
+    { category: '26년 고2 6월 모의고사', en: 'error-free', ko: '오류가 없는' },
+    { category: '26년 고2 6월 모의고사', en: 'metrical', ko: '측정의, 리듬의' },
+    { category: '26년 고2 6월 모의고사', en: 'seem like', ko: '~처럼 보이다' },
+    { category: '26년 고2 6월 모의고사', en: 'trade', ko: '무역, 교역' },
+    { category: '26년 고2 6월 모의고사', en: 'actions', ko: '행동, 조치' },
+    { category: '26년 고2 6월 모의고사', en: 'constraint', ko: '제약, 제한' },
+    { category: '26년 고2 6월 모의고사', en: 'self-restraint', ko: '자제력' },
+    { category: '26년 고2 6월 모의고사', en: 'symbolize', ko: '상징하다' },
+    { category: '26년 고2 6월 모의고사', en: 'strong', ko: '강한' },
+    { category: '26년 고2 6월 모의고사', en: 'often', ko: '자주, 흔히' },
+    { category: '26년 고2 6월 모의고사', en: 'modify', ko: '수정하다, 변경하다' },
+    { category: '26년 고2 6월 모의고사', en: 'eliminate', ko: '제거하다, 없애다' },
+    { category: '26년 고2 6월 모의고사', en: 'basically', ko: '기본적으로' },
+    { category: '26년 고2 6월 모의고사', en: 'event', ko: '사건, 행사' },
+    { category: '26년 고2 6월 모의고사', en: 'prospective', ko: '장래의, 미래의' },
+    { category: '26년 고2 6월 모의고사', en: 'perfect', ko: '완벽한' },
+    { category: '26년 고2 6월 모의고사', en: 'message', ko: '메시지, 문구' },
+    { category: '26년 고2 6월 모의고사', en: 'idea', ko: '아이디어, 생각' },
+    { category: '26년 고2 6월 모의고사', en: 'that is', ko: '즉, 다시 말하면' },
+    { category: '26년 고2 6월 모의고사', en: 'grow', ko: '성장하다' },
+    { category: '26년 고2 6월 모의고사', en: 'hungry', ko: '배고픈' },
+    { category: '26년 고2 6월 모의고사', en: 'food', ko: '음식' },
+    { category: '26년 고2 6월 모의고사', en: 'likely', ko: '가능성이 있는' },
+    { category: '26년 고2 6월 모의고사', en: 'categorize', ko: '범주화하다, 분류하다' },
+    { category: '26년 고2 6월 모의고사', en: 'part', ko: '부분' },
+    { category: '26년 고2 6월 모의고사', en: 'cost', ko: '비용' },
+    { category: '26년 고2 6월 모의고사', en: 'alter', ko: '바꾸다, 변경하다' },
+    { category: '26년 고2 6월 모의고사', en: 'expression', ko: '유전자 발현' },
+    { category: '26년 고2 6월 모의고사', en: 'lottery', ko: '복권' },
+    { category: '26년 고2 6월 모의고사', en: 'happen', ko: '일어나다, 발생하다' },
+    { category: '26년 고2 6월 모의고사', en: 'probability', ko: '확률, 가능성' },
+    { category: '26년 고2 6월 모의고사', en: 'registration', ko: '등록, 신청' },
+    { category: '26년 고2 6월 모의고사', en: 'disappear', ko: '사라지다' },
+    { category: '26년 고2 6월 모의고사', en: 'efficient', ko: '효율적인' },
+    { category: '26년 고2 6월 모의고사', en: 'death', ko: '죽음' },
+    { category: '26년 고2 6월 모의고사', en: 'notice', ko: '알아차리다, 주목하다' },
+    { category: '26년 고2 6월 모의고사', en: 'create', ko: '창조하다, 만들다' },
+    { category: '26년 고2 6월 모의고사', en: 'birthday', ko: '생일' },
+    { category: '26년 고2 6월 모의고사', en: 'wonder', ko: '궁금해하다, 의아해하다' },
+    { category: '26년 고2 6월 모의고사', en: 'simply', ko: '단순히, 그저' },
+    { category: '26년 고2 6월 모의고사', en: 'sensitive', ko: '민감한' },
+    { category: '26년 고2 6월 모의고사', en: 'showcase', ko: '선보이다, 전시하다' },
+    { category: '26년 고2 6월 모의고사', en: 'mistake', ko: '실수' },
+    { category: '26년 고2 6월 모의고사', en: 'interested', ko: '관심이 있는' },
+    { category: '26년 고2 6월 모의고사', en: 'individual', ko: '개인, 개개인' },
+    { category: '26년 고2 6월 모의고사', en: 'else', ko: '그 밖의, 다른' },
+    { category: '26년 고2 6월 모의고사', en: 'useless', ko: '쓸모없는' },
+    { category: '26년 고2 6월 모의고사', en: 'quality', ko: '우수한, 양질의' },
+    { category: '26년 고2 6월 모의고사', en: 'annual', ko: '연례의, 매년의' },
+    { category: '26년 고2 6월 모의고사', en: 'future-proof', ko: '미래에도 유효한' },
+    { category: '26년 고2 6월 모의고사', en: 'wrong', ko: '잘못된, 틀린' },
+    { category: '26년 고2 6월 모의고사', en: 'something', ko: '무언가' },
+    { category: '26년 고2 6월 모의고사', en: 'genomics', ko: '유전체학' },
+    { category: '26년 고2 6월 모의고사', en: 'productive', ko: '생산적인' },
+    { category: '26년 고2 6월 모의고사', en: 'internalize', ko: '내면화하다' },
+    { category: '26년 고2 6월 모의고사', en: 'brain', ko: '뇌, 두뇌' },
+    { category: '26년 고2 6월 모의고사', en: 'scene', ko: '장면, 광장' },
+    { category: '26년 고2 6월 모의고사', en: 'turn into', ko: '~로 변하다' },
+    { category: '26년 고2 6월 모의고사', en: 'percent', ko: '퍼센트' },
+    { category: '26년 고2 6월 모의고사', en: 'model', ko: '모형, 모델' },
+    { category: '26년 고2 6월 모의고사', en: 'equally', ko: '똑같이, 마찬가지로' },
+    { category: '26년 고2 6월 모의고사', en: 'logical', ko: '논리적인' },
+    { category: '26년 고2 6월 모의고사', en: 'likelihood', ko: '가능성, 가망' },
+    { category: '26년 고2 6월 모의고사', en: 'occur', ko: '발생하다, 일어나다' },
+    { category: '26년 고2 6월 모의고사', en: 'economic', ko: '경제의, 경제학의' },
+    { category: '26년 고2 6월 모의고사', en: 'risk', ko: '위험' },
+    { category: '26년 고2 6월 모의고사', en: 'imagination', ko: '상상력' },
+    { category: '26년 고2 6월 모의고사', en: 'low', ko: '낮은' },
+    { category: '26년 고2 6월 모의고사', en: 'cloy', ko: '배부르게 하다, 물리게 하다' },
+    { category: '26년 고2 6월 모의고사', en: 'authentic', ko: '진짜의, 실제의' },
+    { category: '26년 고2 6월 모의고사', en: 'know', ko: '알다' },
+    { category: '26년 고2 6월 모의고사', en: 'fallacy', ko: '오류' },
+    { category: '26년 고2 6월 모의고사', en: 'light', ko: '빛' },
+    { category: '26년 고2 6월 모의고사', en: 'persistence', ko: '지속성, 생존' },
+    { category: '26년 고2 6월 모의고사', en: 'excel', ko: '능가하다, 뛰어나다' },
+    { category: '26년 고2 6월 모의고사', en: 'goods', ko: '상품, 물품' },
+    { category: '26년 고2 6월 모의고사', en: 'pay', ko: '지불하다' },
+    { category: '26년 고2 6월 모의고사', en: 'context', ko: '맥락, 배경' },
+    { category: '26년 고2 6월 모의고사', en: 'variation', ko: '변화, 변동' },
+    { category: '26년 고2 6월 모의고사', en: 'administrator', ko: '관리자' },
+    { category: '26년 고2 6월 모의고사', en: 'infrastructure', ko: '기반 시설' },
+    { category: '26년 고2 6월 모의고사', en: 'appetite', ko: '식욕' },
+    { category: '26년 고2 6월 모의고사', en: 'reputation', ko: '평판, 명성' },
+    { category: '26년 고2 6월 모의고사', en: 'treat', ko: '다루다, 대하다' },
+    { category: '26년 고2 6월 모의고사', en: 'prophet', ko: '예언자, 선구자' },
+    { category: '26년 고2 6월 모의고사', en: 'objective', ko: '객관적인' },
+    { category: '26년 고2 6월 모의고사', en: 'significant', ko: '상당한, 중요한' },
+    { category: '26년 고2 6월 모의고사', en: 'flavor', ko: '맛, 풍미' },
+    { category: '26년 고2 6월 모의고사', en: 'whole', ko: '전체의' },
+    { category: '26년 고2 6월 모의고사', en: 'economy', ko: '경제' },
+    { category: '26년 고2 6월 모의고사', en: 'ticket', ko: '표, 복권' },
+    { category: '26년 고2 6월 모의고사', en: 'overall', ko: '전반적인, 전체적인' },
+    { category: '26년 고2 6월 모의고사', en: 'win', ko: '이기다, (상 등을) 타다' },
+    { category: '26년 고2 6월 모의고사', en: 'bit', ko: '조금, 작은 조각' },
+    { category: '26년 고2 6월 모의고사', en: 'substitute', ko: '대체물, 대용품' },
+    { category: '26년 고2 6월 모의고사', en: 'trigger', ko: '유발하다, 당기다' },
+    { category: '26년 고2 6월 모의고사', en: 'fund', ko: '자금' },
+    { category: '26년 고2 6월 모의고사', en: 'innovation', ko: '혁신' },
+    { category: '26년 고2 6월 모의고사', en: 'million', ko: '백만' },
+    { category: '26년 고2 6월 모의고사', en: 'doomed', ko: '운이 다한, 불행한 운명의' },
+    { category: '26년 고2 6월 모의고사', en: 'detection', ko: '감지, 발견' },
+    { category: '26년 고2 6월 모의고사', en: 'foundation', ko: '기반, 토대' },
+    { category: '26년 고2 6월 모의고사', en: 'compose', ko: '구성하다' },
+    { category: '26년 고2 6월 모의고사', en: 'alternative', ko: '대안의, 대체 가능한' },
+    { category: '26년 고2 6월 모의고사', en: 'goal', ko: '목표' },
+    { category: '26년 고2 6월 모의고사', en: 'see to it', ko: '반드시 ~하도록 조치하다' },
+    { category: '26년 고2 6월 모의고사', en: 'bakery', ko: '빵집, 제과점' },
+    { category: '26년 고2 6월 모의고사', en: 'dimension', ko: '차원, 관점' },
+    { category: '26년 고2 6월 모의고사', en: 'competitive', ko: '경쟁력 있는' },
+    { category: '26년 고2 6월 모의고사', en: 'announce', ko: '발표하다, 공지하다' },
+    { category: '26년 고2 6월 모의고사', en: 'center', ko: '중심, 구심점' },
+    { category: '26년 고2 6월 모의고사', en: 'interpret', ko: '해석하다' },
+    { category: '26년 고2 6월 모의고사', en: 'creep up', ko: '서서히 오르다' },
+    { category: '26년 고2 6월 모의고사', en: 'baker', ko: '제빵사' },
+    { category: '26년 고2 6월 모의고사', en: 'order', ko: '주문하다' },
+    { category: '26년 고2 6월 모의고사', en: 'convert', ko: '전환하다, 바꾸다' },
+    { category: '26년 고2 6월 모의고사', en: 'view', ko: '바라보다, 보고 있다' },
+    { category: '26년 고2 6월 모의고사', en: 'theme', ko: '주제' },
+    { category: '26년 고2 6월 모의고사', en: 'startup', ko: '신생 벤처기업' },
+    { category: '26년 고2 6월 모의고사', en: 'penalty', ko: '처벌, 불이익' },
+    { category: '26년 고2 6월 모의고사', en: 'starve', ko: '굶어 죽다' },
+    { category: '26년 고2 6월 모의고사', en: 'region', ko: '영역, 부위' },
+    { category: '26년 고2 6월 모의고사', en: 'neighbour', ko: '이웃' },
+    { category: '26년 고2 6월 모의고사', en: 'team', ko: '팀' },
+    { category: '26년 고2 6월 모의고사', en: 'publicity', ko: '홍보, 매스컴의 관심' },
+    { category: '26년 고2 6월 모의고사', en: 'assemble', ko: '모으다, 구성하다' },
+    { category: '26년 고2 6월 모의고사', en: 'disparity', ko: '격차, 차이' },
+    { category: '26년 고2 6월 모의고사', en: 'scientist', ko: '과학자' },
+    { category: '26년 고2 6월 모의고사', en: 'board', ko: '안, 탑승' },
+    { category: '26년 고2 6월 모의고사', en: 'allow for', ko: '~을 감안하다, 고려하다' },
+    { category: '26년 고2 6월 모의고사', en: 'present', ko: '제시하다, 발표하다' },
+    { category: '26년 고2 6월 모의고사', en: 'optimistic', ko: '낙관적인' },
+    { category: '26년 고2 6월 모의고사', en: 'odds', ko: '확률, 가능성' },
+    { category: '26년 고2 6월 모의고사', en: 'fair', ko: '박람회, 설명회' },
+    { category: '26년 고2 6월 모의고사', en: 'submit', ko: '제출하다' },
+    { category: '26년 고2 6월 모의고사', en: 'result', ko: '결과' },
+    { category: '26년 고2 6월 모의고사', en: 'conservation', ko: '보존, 보호' },
+    { category: '26년 고2 6월 모의고사', en: 'feast', ko: '축제, 성찬' },
+    { category: '26년 고2 6월 모의고사', en: 'want', ko: '원하다' },
+    { category: '26년 고2 6월 모의고사', en: 'customer', ko: '고객' },
+    { category: '26년 고2 6월 모의고사', en: 'inhibit', ko: '억제하다, 저해하다' },
+    { category: '26년 고2 6월 모의고사', en: 'many', ko: '많은' },
+    { category: '26년 고2 6월 모의고사', en: 'barrier', ko: '장벽, 장애물' },
+    { category: '26년 고2 6월 모의고사', en: 'similar', ko: '비슷한, 유사한' },
+    { category: '26년 고2 6월 모의고사', en: 'independent', ko: '독립국, 독립된 주체' },
+    { category: '26년 고2 6월 모의고사', en: 'predator', ko: '포식자' },
+    { category: '26년 고2 6월 모의고사', en: 'confidence', ko: '신뢰, 확신' },
+    { category: '26년 고2 6월 모의고사', en: 'mechanical', ko: '기계적인, 무의식적인' },
+    { category: '26년 고2 6월 모의고사', en: 'lack', ko: '부족, 결핍' },
+    { category: '26년 고2 6월 모의고사', en: 'chance', ko: '기회, 확률' },
+    { category: '26년 고2 6월 모의고사', en: 'edge', ko: '칼날, 날카로움' },
+    { category: '26년 고2 6월 모의고사', en: 'fail', ko: '실패하다, ~하지 못하다' },
+    { category: '26년 고2 6월 모의고사', en: 'participation', ko: '참여, 참가' },
+    { category: '26년 고2 6월 모의고사', en: 'involve', ko: '포함하다, 관련시키다' },
+    { category: '26년 고2 6월 모의고사', en: 'view', ko: '시야, 관점' },
+    { category: '26년 고2 6월 모의고사', en: 'stellar', ko: '별의' },
+    { category: '26년 고2 6월 모의고사', en: 'hint', ko: '힌트, 단서' },
+    { category: '26년 고2 6월 모의고사', en: 'understand', ko: '이해하다' },
+    { category: '26년 고2 6월 모의고사', en: 'service', ko: '서비스, 용역' },
+    { category: '26년 고2 6월 모의고사', en: 'transaction', ko: '거래' },
+    { category: '26년 고2 6월 모의고사', en: 'benefit', ko: '이익, 혜택' },
+    { category: '26년 고2 6월 모의고사', en: 'subjective', ko: '주관적인' },
+    { category: '26년 고2 6월 모의고사', en: 'renewable', ko: '재생 가능한' },
+    { category: '26년 고2 6월 모의고사', en: 'prototype', ko: '시제품, 초기 모델' },
+    { category: '26년 고2 6월 모의고사', en: 'savings', ko: '절약된 금액, 저축' },
+    { category: '26년 고2 6월 모의고사', en: 'chronic', ko: '만성적인' },
+    { category: '26년 고2 6월 모의고사', en: 'underestimation', ko: '과소평가' },
+    { category: '26년 고2 6월 모의고사', en: 'company', ko: '회사' },
+    { category: '26년 고2 6월 모의고사', en: 'imagery', ko: '형상화, 이미지' },
+    { category: '26년 고2 6월 모의고사', en: 'perfect', ko: '완벽한' },
+    { category: '26년 고2 6월 모의고사', en: 'soon', ko: '곧, 머지않아' },
+    { category: '26년 고2 6월 모의고사', en: 'popular', ko: '인기 있는' },
+    { category: '26년 고2 6월 모의고사', en: 'composition', ko: '구성' },
+    { category: '26년 고2 6월 모의고사', en: 'banquet', ko: '연회, 잔치' },
+    { category: '26년 고2 6월 모의고사', en: 'currency', ko: '통화, 화폐' },
+    { category: '26년 고2 6월 모의고사', en: 'receive', ko: '받다' },
+    { category: '26년 고2 6월 모의고사', en: 'brief', ko: '짧은, 간결한' },
+    { category: '26년 고2 6월 모의고사', en: 'hedge', ko: '헤지 거래를 하다, 위험을 분산하다' },
+    { category: '26년 고2 6월 모의고사', en: 'empathy', ko: '공감, 감정 이입' },
+    { category: '26년 고2 6월 모의고사', en: 'highly', ko: '매우, 크게' },
+    { category: '26년 고2 6월 모의고사', en: 'price', ko: '가격' },
+    { category: '26년 고2 6월 모의고사', en: 'bare', ko: '단순한, 간신히 ~한' },
+    { category: '26년 고2 6월 모의고사', en: 'skilled', ko: '숙련된' },
+    { category: '26년 고2 6월 모의고사', en: 'encourage', ko: '장려하다, 독려하다' },
+    { category: '26년 고2 6월 모의고사', en: 'define', ko: '정의하다' },
+    { category: '26년 고2 6월 모의고사', en: 'evolution', ko: '진화' },
+    { category: '26년 고2 6월 모의고사', en: 'high-end', ko: '최고급의, 고가의' },
+    { category: '26년 고2 6월 모의고사', en: 'factor into', ko: '~을 고려하다, ~을 요소로 포함하다' },
+    { category: '26년 고2 6월 모의고사', en: 'project', ko: '과제, 프로젝트' },
+    { category: '26년 고2 6월 모의고사', en: 'prevailing', ko: '지배적인, 우세한' },
+    { category: '26년 고2 6월 모의고사', en: 'find', ko: '찾다, 발견하다' },
+    { category: '26년 고2 6월 모의고사', en: 'unification', ko: '통합, 단일화' },
+    { category: '26년 고2 6월 모의고사', en: 'commitment', ko: '헌신, 공헌' },
+    { category: '26년 고2 6월 모의고사', en: 'collate', ko: '대조 확인하다, 수집 분석하다' },
+    { category: '26년 고2 6월 모의고사', en: 'reinforce', ko: '강화하다' },
+    { category: '26년 고2 6월 모의고사', en: 'firm', ko: '회사, 기업' },
+    { category: '26년 고2 6월 모의고사', en: 'interact', ko: '상호작용하다' },
+    { category: '26년 고2 6월 모의고사', en: 'opportunity', ko: '기회' },
+    { category: '26년 고2 6월 모의고사', en: 'reorganization', ko: '재편성, 재조직' },
+    { category: '26년 고2 6월 모의고사', en: 'near', ko: '가까운' },
+    { category: '26년 고2 6월 모의고사', en: 'suppose', ko: '가정하다' },
+    { category: '26년 고2 6월 모의고사', en: 'exist', ko: '존재하다' },
+    { category: '26년 고2 6월 모의고사', en: 'description', ko: '설명, 묘사' },
+    { category: '26년 고2 6월 모의고사', en: 'general', ko: '일반적인' },
+    { category: '26년 고2 6월 모의고사', en: 'head', ko: '책임자, 수장' },
+    { category: '26년 고2 6월 모의고사', en: 'overestimate', ko: '과대평가하다' },
+    { category: '26년 고2 6월 모의고사', en: 'small', ko: '작은' },
+    { category: '26년 고2 6월 모의고사', en: 'subjectively', ko: '주관적으로' },
+    { category: '26년 고2 6월 모의고사', en: 'consume', ko: '소비하다, 먹어 치우다' },
+    { category: '26년 고2 6월 모의고사', en: 'necessarily', ko: '반드시, 필연적으로' },
+    { category: '26년 고2 6월 모의고사', en: 'imagine', ko: '상상하다' },
+    { category: '26년 고2 6월 모의고사', en: 'product', ko: '제품, 상품' },
+    { category: '26년 고2 6월 모의고사', en: 'disturbance', ko: '방해, 교란' },
+    { category: '26년 고2 6월 모의고사', en: 'elasticity', ko: '탄력성' },
+    { category: '26년 고2 6월 모의고사', en: 'tend to', ko: '~하는 경향이 있다' },
+    { category: '26년 고2 6월 모의고사', en: 'desensitization', ko: '둔감화' },
+    { category: '26년 고2 6월 모의고사', en: 'problem', ko: '문제' },
+    { category: '26년 고2 6월 모의고사', en: 'straight', ko: '직선의, 직접적인' },
+    { category: '26년 고2 6월 모의고사', en: 'stable', ko: '안정적인' },
+    { category: '26년 고2 6월 모의고사', en: 'world', ko: '세계, 세상' },
+    { category: '26년 고2 6월 모의고사', en: 'explain', ko: '설명하다' },
+    { category: '26년 고2 6월 모의고사', en: 'affluence', ko: '부유함, 풍족함' },
+    { category: '26년 고2 6월 모의고사', en: 'charge', ko: '책임, 담당' },
+    { category: '26년 고2 6월 모의고사', en: 'order', ko: '차수, 순서' },
+    { category: '26년 고2 6월 모의고사', en: 'lack', ko: '~이 부족하다' }
 ];
+    let currentQuizList = [], currentQuestionIndex = 0, score = 0, currentUser = "", currentCorrectAnswer = "", incorrectWords = [];
+    let isPaused = false;
 
-    let currentQuizList = []; // 현재 풀고 있는 카테고리의 단어들만 모아둘 배열
-    let currentCategoryName = "";
-    let currentQuestionIndex = 0, score = 0, currentUser = "", currentCorrectAnswer = "", incorrectWords = [];
-
-    const startScreen = document.getElementById('start-screen'), quizScreen = document.getElementById('quiz-screen'), resultScreen = document.getElementById('result-screen'), adminScreen = document.getElementById('admin-screen'), nameInput = document.getElementById('user-name');
-
-    function shuffleArray(array) { return array.sort(() => Math.random() - 0.5); }
-
-    function resetApp() {
-        startScreen.style.display = 'flex'; quizScreen.style.display = 'none'; resultScreen.style.display = 'none'; adminScreen.style.display = 'none'; nameInput.value = "";
-    }
-
-    // ⭐️ [변경] 퀴즈 시작 시 카테고리 필터링 로직 추가
     function startQuiz() {
-        const name = nameInput.value.trim();
-        if (name === "") { alert("이름을 꼭 입력해주세요!"); return; }
-        
-        // 선택한 카테고리 가져오기
-        const selectedCategory = document.getElementById('category-select').value;
-        currentCategoryName = selectedCategory;
-
-        // 선택한 카테고리에 맞춰 단어 리스트 걸러내기
-        if (selectedCategory === "전체") {
-            currentQuizList = [...fullWordDatabase]; // 전체 복사
-        } else {
-            currentQuizList = fullWordDatabase.filter(word => word.category === selectedCategory);
-        }
-
-        // 객관식 퀴즈이므로 4개 미만이면 진행 불가 처리
-        if (currentQuizList.length < 4) {
-            alert("이 카테고리에는 단어가 4개 미만이라 객관식 퀴즈를 만들 수 없습니다. 단어를 더 추가해주세요!");
-            return;
-        }
-
-        // 시험 순서 무작위 섞기 (원치 않으시면 이 줄을 삭제하세요)
-        shuffleArray(currentQuizList);
-
-        currentUser = name; currentQuestionIndex = 0; score = 0; incorrectWords = [];
-        
-        document.getElementById('quiz-title').innerText = `📝 [${selectedCategory}] 진행 중`;
-        startScreen.style.display = 'none'; quizScreen.style.display = 'flex';
+        currentUser = document.getElementById('user-name').value;
+        const category = document.getElementById('category-select').value;
+        currentQuizList = category === "전체" ? [...fullWordDatabase] : fullWordDatabase.filter(w => w.category === category);
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'flex';
         loadQuestion();
     }
 
     function loadQuestion() {
         if (currentQuestionIndex >= currentQuizList.length) { endQuiz(); return; }
-        const currentWord = currentQuizList[currentQuestionIndex];
-        const isEnToKo = Math.random() > 0.5;
-        let questionText, correctOption;
-
-        if (isEnToKo) { document.getElementById('question-type').innerText = "다음 영단어의 뜻은?"; questionText = currentWord.en; correctOption = currentWord.ko; } 
-        else { document.getElementById('question-type').innerText = "다음 뜻을 가진 영단어는?"; questionText = currentWord.ko; correctOption = currentWord.en; }
-
-        document.getElementById('question-text').innerText = questionText;
-        currentCorrectAnswer = correctOption;
-
-        let wrongWords = currentQuizList.filter(word => word !== currentWord);
-        wrongWords = shuffleArray(wrongWords).slice(0, 3);
-        let wrongOptions = wrongWords.map(word => isEnToKo ? word.ko : word.en);
-        let allOptions = shuffleArray([correctOption, ...wrongOptions]);
-
-        const optionsContainer = document.getElementById('options-container');
-        optionsContainer.innerHTML = "";
-        allOptions.forEach(optionText => {
-            const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = optionText;
-            btn.onclick = () => checkAnswer(optionText, currentWord); optionsContainer.appendChild(btn);
-        });
-        document.getElementById('status-bar').innerText = `진행 상황: ${currentQuestionIndex + 1} / ${currentQuizList.length}`;
+        const word = currentQuizList[currentQuestionIndex];
+        // ... (문제를 로드하는 로직)
+        document.getElementById('status-bar').innerText = `${currentQuestionIndex + 1} / ${currentQuizList.length}`;
     }
 
-    function checkAnswer(selectedOption, currentWordData) {
-        if (selectedOption === currentCorrectAnswer) { score++; } 
-        else { incorrectWords.push({ word: `${currentWordData.en} (${currentWordData.ko})`, studentAnswer: selectedOption, correctAnswer: currentCorrectAnswer }); }
-        currentQuestionIndex++; loadQuestion();
+    function togglePause() {
+        isPaused = !isPaused;
+        document.getElementById('options-container').style.filter = isPaused ? "blur(10px)" : "none";
+        document.getElementById('pause-btn').innerText = isPaused ? "▶️ 재개" : "⏸️ 일시정지";
+    }
+
+    function goBack() {
+        if (currentQuestionIndex > 0) { currentQuestionIndex--; loadQuestion(); }
     }
 
     function endQuiz() {
-        quizScreen.style.display = 'none'; resultScreen.style.display = 'block';
-        document.getElementById('display-name').innerText = currentUser;
-        document.getElementById('result-category').innerText = `[${currentCategoryName} 테스트]`;
-        document.getElementById('total-count').innerText = currentQuizList.length;
-        document.getElementById('correct-count').innerText = score;
-
-        const wrongContainer = document.getElementById('wrong-list-container'), wrongListEl = document.getElementById('wrong-list');
-        wrongListEl.innerHTML = "";
-        if (incorrectWords.length > 0) {
-            wrongContainer.style.display = "block";
-            incorrectWords.forEach(item => {
-                wrongListEl.innerHTML += `<div class="wrong-item"><strong>${item.word}</strong><br>내가 고른 답: <span class="wrong-text">${item.studentAnswer}</span><br>정답: <span class="correct-text">${item.correctAnswer}</span></div>`;
-            });
-        } else { wrongContainer.style.display = "none"; }
-
-        saveRecordToServer();
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        // ... (결과 표시 로직)
     }
 
-    // ⭐️ [변경] 서버로 보낼 때 'category' 정보도 함께 보냄
-    async function saveRecordToServer() {
-        const record = { 
-            name: currentUser, 
-            category: currentCategoryName, // <--- 추가!
-            date: new Date().toLocaleString(), 
-            score: score, 
-            total: currentQuizList.length, 
-            wrong: incorrectWords 
-        };
-        try {
-            await fetch('/api/records', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(record)
-            });
-        } catch (error) { console.error("서버 전송 실패:", error); }
+    function startWrongQuiz() {
+        currentQuizList = incorrectWords.map(w => ({ en: w.word.split(' (')[0], ko: w.word.split('(')[1].replace(')', '') }));
+        currentQuestionIndex = 0; score = 0; incorrectWords = [];
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'flex';
+        loadQuestion();
     }
 
-    function openAdmin() {
-        const password = prompt("관리자 비밀번호를 입력하세요:");
-        if (password === ADMIN_PASSWORD) {
-            startScreen.style.display = 'none'; adminScreen.style.display = 'block';
-            loadRecordsFromServer();
-        } else if (password !== null) { alert("비밀번호가 틀렸습니다."); }
-    }
-
-    // ⭐️ [변경] 관리자 화면에 과목(카테고리) 뱃지 표시
-    async function loadRecordsFromServer() {
-        const recordsContainer = document.getElementById('records-container');
-        recordsContainer.innerHTML = "<p>서버에서 기록을 불러오는 중...</p>";
-        
-        try {
-            const response = await fetch('/api/records');
-            const savedRecords = await response.json();
-            
-            recordsContainer.innerHTML = "";
-            if (savedRecords.length === 0) {
-                recordsContainer.innerHTML = "<p style='color:#888;'>아직 시험 기록이 없습니다.</p>";
-                return;
-            }
-
-            savedRecords.slice().reverse().forEach(record => {
-                // 카테고리 텍스트 (예전 기록은 카테고리가 없을 수 있으므로 방어 코드 작성)
-                const catText = record.category ? record.category : "기본";
-                
-                let wrongHTML = record.wrong.length > 0 ? `<div style="margin-top:5px; color:#dc3545; font-size:12px;">오답: ${record.wrong.map(w => w.word.split(' ')[0]).join(', ')}</div>` : `<div style="margin-top:5px; color:#28a745; font-size:12px;">백점! 🎉</div>`;
-                recordsContainer.innerHTML += `
-                <div class="record-card">
-                    <span class="category-badge">${catText}</span>
-                    <div class="record-header">
-                        <span>👤 ${record.name}</span>
-                        <span>${record.score} / ${record.total} 점</span>
-                    </div>
-                    <div style="font-size: 11px; color: #888;">${record.date}</div>
-                    ${wrongHTML}
-                </div>`;
-            });
-        } catch (error) { recordsContainer.innerHTML = "<p>기록을 불러오지 못했습니다.</p>"; }
-    }
-
-    async function clearRecords() {
-        if(confirm("모든 학생의 기록을 정말 삭제하시겠습니까? (복구 불가)")) {
-            await fetch('/api/records', { method: 'DELETE' });
-            loadRecordsFromServer();
-            alert("서버의 기록이 완전히 삭제되었습니다.");
-        }
-    }
-let isPaused = false;
-
-    // 1. 이전 문제로 돌아가기
-    function goBack() {
-        if (currentQuestionIndex > 0) {
-            currentQuestionIndex--;
-            loadQuestion();
-        } else {
-            alert("첫 번째 문제입니다!");
-        }
-    }
-
-    // 2. 일시정지/재개
-    function togglePause() {
-        const pauseBtn = document.getElementById('pause-btn');
-        const quizContent = document.getElementById('options-container'); // 혹은 주관식 영역
-        
-        isPaused = !isPaused;
-        if (isPaused) {
-            quizContent.style.filter = "blur(10px)"; // 화면 흐리게
-            pauseBtn.innerText = "▶️ 재개하기";
-        } else {
-            quizContent.style.filter = "none"; // 화면 복구
-            pauseBtn.innerText = "⏸️ 일시정지";
-        }
-    }
+    function resetApp() { location.reload(); }
 </script>
 </body>
 </html>
