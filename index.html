@@ -101,11 +101,13 @@
         <button class="admin-link" onclick="openAdmin()">⚙️ 관리자 모드 접속</button>
     </div>
 
-    <div id="quiz-screen" style="display: none; flex-direction: column; height: 100%;">
-        <h1 id="quiz-title">📝 시험 진행 중</h1>
-        <div class="question-box">
-            <div class="question-type" id="question-type">질문 유형</div>
-            <div class="question-text" id="question-text">Word</div>
+   <div id="quiz-screen" style="display: none; flex-direction: column; height: 100%;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <button onclick="goBack()" style="background:none; border:none; color:#7f8c8d; font-size:14px; cursor:pointer;">⬅️ 이전 문제</button>
+            <button onclick="togglePause()" id="pause-btn" style="background:none; border:none; color:#7f8c8d; font-size:14px; cursor:pointer;">⏸️ 일시정지</button>
+        </div>
+        
+        <h1 id="quiz-title" style="font-size: 18px;">📝 시험 진행 중</h1>
         </div>
         <div class="options-container" id="options-container"></div>
         <div style="color: #888; font-size: 14px; margin-top: auto;" id="status-bar">진행 상황: 0 / 0</div>
@@ -549,6 +551,32 @@
             await fetch('/api/records', { method: 'DELETE' });
             loadRecordsFromServer();
             alert("서버의 기록이 완전히 삭제되었습니다.");
+        }
+    }
+let isPaused = false;
+
+    // 1. 이전 문제로 돌아가기
+    function goBack() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        } else {
+            alert("첫 번째 문제입니다!");
+        }
+    }
+
+    // 2. 일시정지/재개
+    function togglePause() {
+        const pauseBtn = document.getElementById('pause-btn');
+        const quizContent = document.getElementById('options-container'); // 혹은 주관식 영역
+        
+        isPaused = !isPaused;
+        if (isPaused) {
+            quizContent.style.filter = "blur(10px)"; // 화면 흐리게
+            pauseBtn.innerText = "▶️ 재개하기";
+        } else {
+            quizContent.style.filter = "none"; // 화면 복구
+            pauseBtn.innerText = "⏸️ 일시정지";
         }
     }
 </script>
